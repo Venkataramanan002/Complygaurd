@@ -1,0 +1,40 @@
+# Git / VCS
+.git
+.gitignore
+
+# SECURITY: Exclude secrets from Docker image layers
+.env
+.env.*
+alembic.ini
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# Node
+fortress-lens-main/node_modules/
+fortress-lens-main/dist/
+
+# IDE / OS
+.vscode/
+.claude/
+.DS_Store
+Thumbs.db
+
+# Runtime data not required in build context
+firewall.db
+*.db
+*.sqlite
+data/
+sample_data/
+
+# Large / optional local artifacts
+model/
+*.gguf
+*.log
+*.tmp
