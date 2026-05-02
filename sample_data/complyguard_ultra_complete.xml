@@ -1,0 +1,2200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    ============================================================
+    COMPLYGUARD ULTRA-COMPREHENSIVE FIREWALL CONFIG
+    Vendor: Palo Alto Networks
+    Device: PA-5260
+    Version: PAN-OS 11.0.1
+    Generated: 2026-03-23
+    Purpose: Full analysis - contains every extractable field
+    ============================================================
+-->
+<config version="11.0.1" urldb="paloaltonetworks" detail-version="11.0.1">
+
+  <metadata>
+    <device-info>
+      <device-name>PA-FW-ENTERPRISE-01</device-name>
+      <device-id>0123456789ABCDEF</device-id>
+      <serial-number>PA-HW-5260-SN-001234</serial-number>
+      <vendor>Palo Alto Networks</vendor>
+      <model>PA-5260</model>
+      <os-version>PAN-OS 11.0.1</os-version>
+      <firmware-version>11.0.1-h3</firmware-version>
+      <hardware-version>A1</hardware-version>
+      <uptime>365 days 4 hours 22 minutes</uptime>
+      <last-config-change>2026-03-20T14:32:11Z</last-config-change>
+      <config-version>847</config-version>
+      <management-ip>10.30.0.1</management-ip>
+      <management-port>443</management-port>
+      <ha-state>active</ha-state>
+      <ha-peer>PA-FW-ENTERPRISE-02</ha-peer>
+      <ha-peer-ip>10.30.0.2</ha-peer-ip>
+      <location>Primary Data Centre - Rack 14</location>
+      <contact>security-team@company.com</contact>
+      <timezone>Asia/Kolkata</timezone>
+    </device-info>
+
+    <connected-firewalls>
+      <firewall>
+        <name>BRANCH-FW-01</name>
+        <ip>203.0.113.50</ip>
+        <vendor>Fortinet</vendor>
+        <model>FortiGate 100F</model>
+        <connection-type>IPSec-VPN</connection-type>
+        <tunnel-interface>tunnel.1</tunnel-interface>
+        <trust-level>medium</trust-level>
+        <location>Branch Office Mumbai</location>
+      </firewall>
+      <firewall>
+        <name>CLOUD-FW-AWS-01</name>
+        <ip>52.66.100.10</ip>
+        <vendor>Palo Alto VM-Series</vendor>
+        <model>VM-300</model>
+        <connection-type>IPSec-VPN</connection-type>
+        <tunnel-interface>tunnel.2</tunnel-interface>
+        <trust-level>medium</trust-level>
+        <location>AWS ap-south-1</location>
+      </firewall>
+      <firewall>
+        <name>DC-CORE-SWITCH-FW</name>
+        <ip>10.0.0.254</ip>
+        <vendor>Cisco</vendor>
+        <model>Catalyst 9500</model>
+        <connection-type>routed-interface</connection-type>
+        <trust-level>high</trust-level>
+        <location>Core Network Layer</location>
+      </firewall>
+    </connected-firewalls>
+  </metadata>
+
+  <devices>
+    <entry name="localhost.localdomain">
+      <deviceconfig>
+        <system>
+          <hostname>PA-FW-ENTERPRISE-01</hostname>
+          <domain>company.local</domain>
+          <ip-address>10.30.0.1</ip-address>
+          <netmask>255.255.255.0</netmask>
+          <default-gateway>10.30.0.254</default-gateway>
+          <dns-setting>
+            <servers>
+              <primary>8.8.8.8</primary>
+              <secondary>8.8.4.4</secondary>
+            </servers>
+          </dns-setting>
+          <ntp-server-1>pool.ntp.org</ntp-server-1>
+          <timezone>Asia/Kolkata</timezone>
+          <login-banner>AUTHORISED ACCESS ONLY - All activity is monitored and logged</login-banner>
+        </system>
+        <setting>
+          <management>
+            <idle-timeout>10</idle-timeout>
+            <max-login-attempts>3</max-login-attempts>
+            <lockout-time>30</lockout-time>
+          </management>
+        </setting>
+      </deviceconfig>
+
+      <!-- ============================================================ -->
+      <!-- HIGH AVAILABILITY CONFIGURATION                               -->
+      <!-- ============================================================ -->
+      <high-availability>
+        <enabled>yes</enabled>
+        <group>
+          <group-id>1</group-id>
+          <description>Active-Passive HA Pair</description>
+          <mode>
+            <active-passive>
+              <passive-link-state>shutdown</passive-link-state>
+              <monitor-fail-holddown>1</monitor-fail-holddown>
+            </active-passive>
+          </mode>
+          <peer-ip>10.30.0.2</peer-ip>
+          <peer-ip-backup>192.168.255.2</peer-ip-backup>
+          <heartbeat-backup>yes</heartbeat-backup>
+          <state-synchronization>
+            <enabled>yes</enabled>
+            <transport>ethernet</transport>
+          </state-synchronization>
+        </group>
+      </high-availability>
+
+      <!-- ============================================================ -->
+      <!-- NETWORK INTERFACES                                            -->
+      <!-- ============================================================ -->
+      <network>
+        <interface>
+          <ethernet>
+            <entry name="ethernet1/1">
+              <layer3>
+                <ip><entry name="203.0.113.1/24"/></ip>
+                <mtu>1500</mtu>
+                <adjust-tcp-mss>yes</adjust-tcp-mss>
+              </layer3>
+              <link-speed>1000</link-speed>
+              <link-duplex>full</link-duplex>
+              <link-state>auto</link-state>
+              <comment>WAN - Primary Internet Uplink - ISP: Jio</comment>
+            </entry>
+            <entry name="ethernet1/2">
+              <layer3>
+                <ip><entry name="198.51.100.1/24"/></ip>
+                <mtu>1500</mtu>
+              </layer3>
+              <link-speed>1000</link-speed>
+              <link-duplex>full</link-duplex>
+              <comment>WAN - Secondary Internet Uplink - ISP: Airtel</comment>
+            </entry>
+            <entry name="ethernet1/3">
+              <layer3>
+                <ip><entry name="10.10.10.1/24"/></ip>
+                <mtu>1500</mtu>
+              </layer3>
+              <comment>DMZ - Public Facing Servers</comment>
+            </entry>
+            <entry name="ethernet1/4">
+              <layer3>
+                <ip><entry name="10.0.0.1/24"/></ip>
+                <mtu>1500</mtu>
+              </layer3>
+              <comment>Internal Corporate LAN</comment>
+            </entry>
+            <entry name="ethernet1/5">
+              <layer3>
+                <ip><entry name="10.20.0.1/24"/></ip>
+                <mtu>9000</mtu>
+                <adjust-tcp-mss>yes</adjust-tcp-mss>
+              </layer3>
+              <comment>Database Zone - Jumbo frames enabled</comment>
+            </entry>
+            <entry name="ethernet1/6">
+              <layer3>
+                <ip><entry name="10.30.0.1/24"/></ip>
+                <mtu>1500</mtu>
+              </layer3>
+              <comment>Management Zone - Admin Access Only</comment>
+            </entry>
+            <entry name="ethernet1/7">
+              <layer3>
+                <ip><entry name="172.16.0.1/24"/></ip>
+                <mtu>1500</mtu>
+              </layer3>
+              <comment>Guest WiFi Network</comment>
+            </entry>
+            <entry name="ethernet1/8">
+              <layer3>
+                <ip><entry name="10.40.0.1/24"/></ip>
+                <mtu>1500</mtu>
+              </layer3>
+              <comment>OT/SCADA Network - Industrial Control Systems</comment>
+            </entry>
+            <entry name="ethernet1/9">
+              <layer3>
+                <ip><entry name="10.50.0.1/24"/></ip>
+                <mtu>1500</mtu>
+              </layer3>
+              <comment>IoT Device Network</comment>
+            </entry>
+            <entry name="ethernet1/10">
+              <layer3>
+                <ip><entry name="10.60.0.1/24"/></ip>
+                <mtu>1500</mtu>
+              </layer3>
+              <comment>Development and Testing Network</comment>
+            </entry>
+            <entry name="ethernet1/11">
+              <layer3>
+                <ip><entry name="10.70.0.1/24"/></ip>
+                <mtu>1500</mtu>
+              </layer3>
+              <comment>VoIP and Unified Communications</comment>
+            </entry>
+            <entry name="ethernet1/12">
+              <layer3>
+                <ip><entry name="10.80.0.1/24"/></ip>
+                <mtu>1500</mtu>
+              </layer3>
+              <comment>PCI DSS Cardholder Data Environment</comment>
+            </entry>
+          </ethernet>
+
+          <tunnel>
+            <entry name="tunnel.1">
+              <ip><entry name="10.100.1.1/30"/></ip>
+              <comment>VPN Tunnel to Branch Office Mumbai - BRANCH-FW-01</comment>
+              <mtu>1400</mtu>
+            </entry>
+            <entry name="tunnel.2">
+              <ip><entry name="10.100.2.1/30"/></ip>
+              <comment>VPN Tunnel to AWS Cloud - CLOUD-FW-AWS-01</comment>
+              <mtu>1400</mtu>
+            </entry>
+            <entry name="tunnel.3">
+              <ip><entry name="10.100.3.1/30"/></ip>
+              <comment>VPN Tunnel to DR Site - DR-FW-01</comment>
+              <mtu>1400</mtu>
+            </entry>
+          </tunnel>
+
+          <loopback>
+            <entry name="loopback.1">
+              <ip><entry name="192.168.255.1/32"/></ip>
+              <comment>HA Heartbeat Interface</comment>
+            </entry>
+          </loopback>
+        </interface>
+
+        <!-- ============================================================ -->
+        <!-- SECURITY ZONES                                                -->
+        <!-- ============================================================ -->
+        <zones>
+          <entry name="untrust">
+            <network>
+              <layer3>
+                <member>ethernet1/1</member>
+                <member>ethernet1/2</member>
+              </layer3>
+            </network>
+            <zone-protection-profile>Aggressive-Zone-Protection</zone-protection-profile>
+            <log-setting>default</log-setting>
+            <enable-user-identification>no</enable-user-identification>
+            <is-entry-point>yes</is-entry-point>
+            <trust-level>0</trust-level>
+            <description>Internet facing zone - zero trust</description>
+          </entry>
+
+          <entry name="dmz">
+            <network>
+              <layer3><member>ethernet1/3</member></layer3>
+            </network>
+            <zone-protection-profile>DMZ-Zone-Protection</zone-protection-profile>
+            <log-setting>default</log-setting>
+            <enable-user-identification>no</enable-user-identification>
+            <is-entry-point>no</is-entry-point>
+            <trust-level>25</trust-level>
+            <description>Semi-trusted DMZ for public facing services</description>
+          </entry>
+
+          <entry name="trust">
+            <network>
+              <layer3><member>ethernet1/4</member></layer3>
+            </network>
+            <log-setting>default</log-setting>
+            <enable-user-identification>yes</enable-user-identification>
+            <user-id-agent>
+              <entry name="AD-Agent-01">
+                <host>10.0.0.50</host>
+                <port>5007</port>
+              </entry>
+            </user-id-agent>
+            <is-entry-point>no</is-entry-point>
+            <trust-level>75</trust-level>
+            <description>Internal corporate network</description>
+          </entry>
+
+          <entry name="database_servers">
+            <network>
+              <layer3><member>ethernet1/5</member></layer3>
+            </network>
+            <log-setting>default</log-setting>
+            <enable-user-identification>no</enable-user-identification>
+            <is-entry-point>no</is-entry-point>
+            <trust-level>90</trust-level>
+            <description>Crown jewel database zone - maximum protection</description>
+            <crown-jewel>yes</crown-jewel>
+          </entry>
+
+          <entry name="management">
+            <network>
+              <layer3><member>ethernet1/6</member></layer3>
+            </network>
+            <log-setting>default</log-setting>
+            <enable-user-identification>yes</enable-user-identification>
+            <is-entry-point>no</is-entry-point>
+            <trust-level>95</trust-level>
+            <description>Out-of-band management network</description>
+          </entry>
+
+          <entry name="guest">
+            <network>
+              <layer3><member>ethernet1/7</member></layer3>
+            </network>
+            <zone-protection-profile>Guest-Zone-Protection</zone-protection-profile>
+            <log-setting>default</log-setting>
+            <enable-user-identification>no</enable-user-identification>
+            <is-entry-point>no</is-entry-point>
+            <trust-level>5</trust-level>
+            <description>Guest wireless - internet only</description>
+          </entry>
+
+          <entry name="ot_scada">
+            <network>
+              <layer3><member>ethernet1/8</member></layer3>
+            </network>
+            <zone-protection-profile>OT-Zone-Protection</zone-protection-profile>
+            <log-setting>default</log-setting>
+            <enable-user-identification>no</enable-user-identification>
+            <is-entry-point>no</is-entry-point>
+            <trust-level>80</trust-level>
+            <description>OT/SCADA industrial control systems - air-gapped preferred</description>
+            <crown-jewel>yes</crown-jewel>
+          </entry>
+
+          <entry name="iot">
+            <network>
+              <layer3><member>ethernet1/9</member></layer3>
+            </network>
+            <zone-protection-profile>IoT-Zone-Protection</zone-protection-profile>
+            <log-setting>default</log-setting>
+            <enable-user-identification>no</enable-user-identification>
+            <is-entry-point>no</is-entry-point>
+            <trust-level>10</trust-level>
+            <description>IoT devices - cameras printers sensors</description>
+          </entry>
+
+          <entry name="development">
+            <network>
+              <layer3><member>ethernet1/10</member></layer3>
+            </network>
+            <log-setting>default</log-setting>
+            <enable-user-identification>yes</enable-user-identification>
+            <is-entry-point>no</is-entry-point>
+            <trust-level>40</trust-level>
+            <description>Development and testing environment</description>
+          </entry>
+
+          <entry name="voip">
+            <network>
+              <layer3><member>ethernet1/11</member></layer3>
+            </network>
+            <log-setting>default</log-setting>
+            <enable-user-identification>no</enable-user-identification>
+            <is-entry-point>no</is-entry-point>
+            <trust-level>60</trust-level>
+            <description>VoIP and unified communications</description>
+          </entry>
+
+          <entry name="pci_cde">
+            <network>
+              <layer3><member>ethernet1/12</member></layer3>
+            </network>
+            <zone-protection-profile>PCI-Zone-Protection</zone-protection-profile>
+            <log-setting>pci-logging</log-setting>
+            <enable-user-identification>yes</enable-user-identification>
+            <is-entry-point>no</is-entry-point>
+            <trust-level>95</trust-level>
+            <description>PCI DSS Cardholder Data Environment - strict compliance required</description>
+            <crown-jewel>yes</crown-jewel>
+            <compliance>
+              <standard>PCI-DSS-v4.0</standard>
+              <scope>in-scope</scope>
+            </compliance>
+          </entry>
+
+          <entry name="vpn_branch">
+            <network>
+              <layer3>
+                <member>tunnel.1</member>
+              </layer3>
+            </network>
+            <log-setting>default</log-setting>
+            <is-entry-point>no</is-entry-point>
+            <trust-level>50</trust-level>
+            <description>Branch office VPN zone</description>
+          </entry>
+
+          <entry name="vpn_cloud">
+            <network>
+              <layer3>
+                <member>tunnel.2</member>
+              </layer3>
+            </network>
+            <log-setting>default</log-setting>
+            <is-entry-point>no</is-entry-point>
+            <trust-level>45</trust-level>
+            <description>Cloud infrastructure VPN zone</description>
+          </entry>
+        </zones>
+
+        <!-- ============================================================ -->
+        <!-- ROUTING                                                        -->
+        <!-- ============================================================ -->
+        <virtual-router>
+          <entry name="default">
+            <routing-table>
+              <ip>
+                <static-route>
+                  <entry name="default-route">
+                    <destination>0.0.0.0/0</destination>
+                    <nexthop><ip-address>203.0.113.254</ip-address></nexthop>
+                    <metric>10</metric>
+                    <administrative-distance>10</administrative-distance>
+                  </entry>
+                  <entry name="default-route-backup">
+                    <destination>0.0.0.0/0</destination>
+                    <nexthop><ip-address>198.51.100.254</ip-address></nexthop>
+                    <metric>20</metric>
+                    <administrative-distance>10</administrative-distance>
+                  </entry>
+                  <entry name="branch-route">
+                    <destination>192.168.10.0/24</destination>
+                    <nexthop><ip-address>10.100.1.2</ip-address></nexthop>
+                    <metric>10</metric>
+                  </entry>
+                  <entry name="cloud-route">
+                    <destination>172.31.0.0/16</destination>
+                    <nexthop><ip-address>10.100.2.2</ip-address></nexthop>
+                    <metric>10</metric>
+                  </entry>
+                </static-route>
+              </ip>
+            </routing-table>
+            <protocol>
+              <ospf>
+                <enable>yes</enable>
+                <router-id>10.0.0.1</router-id>
+                <area>
+                  <entry name="0.0.0.0">
+                    <type><normal/></type>
+                    <interface>
+                      <entry name="ethernet1/4">
+                        <enable>yes</enable>
+                        <passive>no</passive>
+                        <metric>10</metric>
+                      </entry>
+                    </interface>
+                  </entry>
+                </area>
+              </ospf>
+              <bgp>
+                <enable>yes</enable>
+                <router-id>203.0.113.1</router-id>
+                <local-as>65001</local-as>
+                <peer-group>
+                  <entry name="ISP-PEERS">
+                    <peer>
+                      <entry name="JIO-BGP">
+                        <peer-as>64512</peer-as>
+                        <peer-address>203.0.113.254</peer-address>
+                        <connection-options>
+                          <keep-alive-interval>30</keep-alive-interval>
+                          <hold-time>90</hold-time>
+                        </connection-options>
+                      </entry>
+                      <entry name="AIRTEL-BGP">
+                        <peer-as>64513</peer-as>
+                        <peer-address>198.51.100.254</peer-address>
+                        <connection-options>
+                          <keep-alive-interval>30</keep-alive-interval>
+                          <hold-time>90</hold-time>
+                        </connection-options>
+                      </entry>
+                    </peer>
+                  </entry>
+                </peer-group>
+              </bgp>
+            </protocol>
+          </entry>
+        </virtual-router>
+
+        <!-- ============================================================ -->
+        <!-- ZONE PROTECTION PROFILES                                      -->
+        <!-- ============================================================ -->
+        <zone-protection-profile>
+          <entry name="Aggressive-Zone-Protection">
+            <flood>
+              <syn>
+                <enable>yes</enable>
+                <red>
+                  <alarm-rate>10000</alarm-rate>
+                  <activate-rate>15000</activate-rate>
+                  <maximal-rate>25000</maximal-rate>
+                  <block-duration>300</block-duration>
+                </red>
+              </syn>
+              <udp>
+                <enable>yes</enable>
+                <red>
+                  <alarm-rate>20000</alarm-rate>
+                  <activate-rate>30000</activate-rate>
+                  <maximal-rate>50000</maximal-rate>
+                  <block-duration>300</block-duration>
+                </red>
+              </udp>
+              <icmp>
+                <enable>yes</enable>
+                <red>
+                  <alarm-rate>1000</alarm-rate>
+                  <activate-rate>5000</activate-rate>
+                  <maximal-rate>10000</maximal-rate>
+                  <block-duration>300</block-duration>
+                </red>
+              </icmp>
+              <icmpv6>
+                <enable>yes</enable>
+              </icmpv6>
+            </flood>
+            <reconnaissance>
+              <tcp-port-scan>
+                <enable>yes</enable>
+                <interval>2</interval>
+                <threshold>100</threshold>
+                <block-duration>3600</block-duration>
+              </tcp-port-scan>
+              <host-sweep>
+                <enable>yes</enable>
+                <interval>2</interval>
+                <threshold>10</threshold>
+                <block-duration>3600</block-duration>
+              </host-sweep>
+              <udp-port-scan>
+                <enable>yes</enable>
+                <interval>2</interval>
+                <threshold>100</threshold>
+                <block-duration>3600</block-duration>
+              </udp-port-scan>
+            </reconnaissance>
+            <packet-based-attack-protection>
+              <ip-drop>
+                <spoofed-ip-address>yes</spoofed-ip-address>
+                <land-attack>yes</land-attack>
+                <null-payload>yes</null-payload>
+              </ip-drop>
+              <tcp-drop>
+                <synfin>yes</synfin>
+                <xmas>yes</xmas>
+                <syn-with-data>yes</syn-with-data>
+                <split-handshake>yes</split-handshake>
+              </tcp-drop>
+            </packet-based-attack-protection>
+          </entry>
+        </zone-protection-profile>
+      </network>
+
+      <vsys>
+        <entry name="vsys1">
+
+          <!-- ============================================================ -->
+          <!-- ADDRESS OBJECTS                                               -->
+          <!-- ============================================================ -->
+          <address>
+            <!-- Web Servers -->
+            <entry name="web-server-primary">
+              <ip-netmask>10.10.10.10/32</ip-netmask>
+              <description>Primary web server - nginx - DMZ</description>
+              <tag><member>dmz</member><member>web</member></tag>
+            </entry>
+            <entry name="web-server-secondary">
+              <ip-netmask>10.10.10.11/32</ip-netmask>
+              <description>Secondary web server - DMZ</description>
+              <tag><member>dmz</member><member>web</member></tag>
+            </entry>
+            <entry name="api-gateway">
+              <ip-netmask>10.10.10.20/32</ip-netmask>
+              <description>API Gateway server - DMZ</description>
+              <tag><member>dmz</member><member>api</member></tag>
+            </entry>
+            <entry name="mail-server">
+              <ip-netmask>10.10.10.30/32</ip-netmask>
+              <description>Mail server - Exchange - DMZ</description>
+              <tag><member>dmz</member><member>mail</member></tag>
+            </entry>
+
+            <!-- Database Servers - Crown Jewels -->
+            <entry name="db-primary">
+              <ip-netmask>10.20.0.10/32</ip-netmask>
+              <description>Primary MySQL database - CROWN JEWEL - customer data</description>
+              <tag><member>crown-jewel</member><member>database</member><member>pci-scope</member></tag>
+            </entry>
+            <entry name="db-replica">
+              <ip-netmask>10.20.0.11/32</ip-netmask>
+              <description>MySQL replica - CROWN JEWEL</description>
+              <tag><member>crown-jewel</member><member>database</member></tag>
+            </entry>
+            <entry name="db-mssql">
+              <ip-netmask>10.20.0.12/32</ip-netmask>
+              <description>Microsoft SQL Server - ERP data - CROWN JEWEL</description>
+              <tag><member>crown-jewel</member><member>database</member></tag>
+            </entry>
+            <entry name="db-oracle">
+              <ip-netmask>10.20.0.13/32</ip-netmask>
+              <description>Oracle DB - financial data - CROWN JEWEL</description>
+              <tag><member>crown-jewel</member><member>database</member><member>pci-scope</member></tag>
+            </entry>
+            <entry name="db-mongodb">
+              <ip-netmask>10.20.0.14/32</ip-netmask>
+              <description>MongoDB - analytics - CROWN JEWEL</description>
+              <tag><member>crown-jewel</member><member>database</member></tag>
+            </entry>
+
+            <!-- Internal Servers -->
+            <entry name="auth-server-ad">
+              <ip-netmask>10.0.0.50/32</ip-netmask>
+              <description>Active Directory Domain Controller - CROWN JEWEL</description>
+              <tag><member>crown-jewel</member><member>internal</member><member>authentication</member></tag>
+            </entry>
+            <entry name="auth-server-ad-secondary">
+              <ip-netmask>10.0.0.51/32</ip-netmask>
+              <description>Secondary AD Domain Controller</description>
+              <tag><member>crown-jewel</member><member>internal</member><member>authentication</member></tag>
+            </entry>
+            <entry name="backup-server">
+              <ip-netmask>10.0.0.100/32</ip-netmask>
+              <description>Veeam backup server - CROWN JEWEL</description>
+              <tag><member>crown-jewel</member><member>internal</member></tag>
+            </entry>
+            <entry name="siem-server">
+              <ip-netmask>10.0.0.200/32</ip-netmask>
+              <description>SIEM/SOC server - Splunk</description>
+              <tag><member>internal</member><member>security</member></tag>
+            </entry>
+            <entry name="file-server">
+              <ip-netmask>10.0.0.150/32</ip-netmask>
+              <description>File server - sensitive documents</description>
+              <tag><member>crown-jewel</member><member>internal</member></tag>
+            </entry>
+            <entry name="erp-server">
+              <ip-netmask>10.0.0.120/32</ip-netmask>
+              <description>SAP ERP server - business critical</description>
+              <tag><member>crown-jewel</member><member>internal</member></tag>
+            </entry>
+            <entry name="hr-server">
+              <ip-netmask>10.0.0.130/32</ip-netmask>
+              <description>HR system - employee PII data</description>
+              <tag><member>crown-jewel</member><member>internal</member><member>pii</member></tag>
+            </entry>
+            <entry name="payment-gateway">
+              <ip-netmask>10.80.0.10/32</ip-netmask>
+              <description>Payment gateway server - PCI CDE</description>
+              <tag><member>crown-jewel</member><member>pci-scope</member></tag>
+            </entry>
+
+            <!-- OT/SCADA -->
+            <entry name="scada-controller">
+              <ip-netmask>10.40.0.10/32</ip-netmask>
+              <description>SCADA PLC controller - critical infrastructure</description>
+              <tag><member>crown-jewel</member><member>ot-scada</member></tag>
+            </entry>
+            <entry name="hmi-workstation">
+              <ip-netmask>10.40.0.20/32</ip-netmask>
+              <description>HMI operator workstation</description>
+              <tag><member>ot-scada</member></tag>
+            </entry>
+
+            <!-- Network Ranges -->
+            <entry name="internal-subnet">
+              <ip-netmask>10.0.0.0/24</ip-netmask>
+              <description>Internal corporate LAN</description>
+            </entry>
+            <entry name="dmz-subnet">
+              <ip-netmask>10.10.10.0/24</ip-netmask>
+              <description>DMZ network</description>
+            </entry>
+            <entry name="db-subnet">
+              <ip-netmask>10.20.0.0/24</ip-netmask>
+              <description>Database network</description>
+            </entry>
+            <entry name="mgmt-subnet">
+              <ip-netmask>10.30.0.0/24</ip-netmask>
+              <description>Management network</description>
+            </entry>
+            <entry name="guest-subnet">
+              <ip-netmask>172.16.0.0/24</ip-netmask>
+              <description>Guest wireless network</description>
+            </entry>
+            <entry name="ot-subnet">
+              <ip-netmask>10.40.0.0/24</ip-netmask>
+              <description>OT/SCADA network</description>
+            </entry>
+            <entry name="iot-subnet">
+              <ip-netmask>10.50.0.0/24</ip-netmask>
+              <description>IoT device network</description>
+            </entry>
+            <entry name="dev-subnet">
+              <ip-netmask>10.60.0.0/24</ip-netmask>
+              <description>Development network</description>
+            </entry>
+            <entry name="pci-subnet">
+              <ip-netmask>10.80.0.0/24</ip-netmask>
+              <description>PCI CDE network</description>
+            </entry>
+            <entry name="branch-subnet">
+              <ip-netmask>192.168.10.0/24</ip-netmask>
+              <description>Branch office Mumbai network</description>
+            </entry>
+            <entry name="cloud-subnet">
+              <ip-netmask>172.31.0.0/16</ip-netmask>
+              <description>AWS cloud network</description>
+            </entry>
+
+            <!-- External threat IPs -->
+            <entry name="known-bad-ip-1">
+              <ip-netmask>185.220.101.0/24</ip-netmask>
+              <description>Known Tor exit node range</description>
+              <tag><member>threat-intel</member><member>tor</member></tag>
+            </entry>
+            <entry name="known-bad-ip-2">
+              <ip-netmask>45.142.212.0/24</ip-netmask>
+              <description>Known C2 infrastructure range</description>
+              <tag><member>threat-intel</member><member>c2</member></tag>
+            </entry>
+          </address>
+
+          <!-- ============================================================ -->
+          <!-- ADDRESS GROUPS                                                -->
+          <!-- ============================================================ -->
+          <address-group>
+            <entry name="all-web-servers">
+              <static>
+                <member>web-server-primary</member>
+                <member>web-server-secondary</member>
+                <member>api-gateway</member>
+              </static>
+              <description>All DMZ web servers</description>
+            </entry>
+            <entry name="crown-jewel-assets">
+              <static>
+                <member>db-primary</member>
+                <member>db-replica</member>
+                <member>db-mssql</member>
+                <member>db-oracle</member>
+                <member>db-mongodb</member>
+                <member>auth-server-ad</member>
+                <member>auth-server-ad-secondary</member>
+                <member>backup-server</member>
+                <member>file-server</member>
+                <member>erp-server</member>
+                <member>hr-server</member>
+                <member>payment-gateway</member>
+                <member>scada-controller</member>
+              </static>
+              <description>All crown jewel assets requiring maximum protection</description>
+            </entry>
+            <entry name="all-database-servers">
+              <static>
+                <member>db-primary</member>
+                <member>db-replica</member>
+                <member>db-mssql</member>
+                <member>db-oracle</member>
+                <member>db-mongodb</member>
+              </static>
+              <description>All database servers</description>
+            </entry>
+            <entry name="pci-scope-assets">
+              <static>
+                <member>payment-gateway</member>
+                <member>db-primary</member>
+                <member>db-oracle</member>
+              </static>
+              <description>PCI DSS in-scope assets</description>
+            </entry>
+            <entry name="threat-intel-ips">
+              <static>
+                <member>known-bad-ip-1</member>
+                <member>known-bad-ip-2</member>
+              </static>
+              <description>Known malicious IP ranges from threat intelligence</description>
+            </entry>
+          </address-group>
+
+          <!-- ============================================================ -->
+          <!-- SERVICE OBJECTS - EVERY SIGNIFICANT PORT                     -->
+          <!-- ============================================================ -->
+          <service>
+            <!-- Web Services -->
+            <entry name="svc-http"><protocol><tcp><port>80</port></tcp></protocol><description>HTTP - unencrypted web</description></entry>
+            <entry name="svc-https"><protocol><tcp><port>443</port></tcp></protocol><description>HTTPS - encrypted web</description></entry>
+            <entry name="svc-http-alt"><protocol><tcp><port>8080</port></tcp></protocol><description>HTTP alternate - common C2 port</description></entry>
+            <entry name="svc-https-alt"><protocol><tcp><port>8443</port></tcp></protocol><description>HTTPS alternate management</description></entry>
+
+            <!-- Remote Access - HIGH RISK -->
+            <entry name="svc-ssh"><protocol><tcp><port>22</port></tcp></protocol><description>SSH - encrypted remote admin</description></entry>
+            <entry name="svc-telnet"><protocol><tcp><port>23</port></tcp></protocol><description>TELNET - INSECURE cleartext</description></entry>
+            <entry name="svc-rdp"><protocol><tcp><port>3389</port></tcp></protocol><description>RDP - HIGH RISK CVE-2019-0708 BlueKeep</description></entry>
+            <entry name="svc-vnc"><protocol><tcp><port>5900</port></tcp></protocol><description>VNC - unencrypted remote desktop</description></entry>
+            <entry name="svc-winrm-http"><protocol><tcp><port>5985</port></tcp></protocol><description>WinRM HTTP - Windows remote management</description></entry>
+            <entry name="svc-winrm-https"><protocol><tcp><port>5986</port></tcp></protocol><description>WinRM HTTPS</description></entry>
+            <entry name="svc-rexec"><protocol><tcp><port>512</port></tcp></protocol><description>rexec - INSECURE legacy remote exec</description></entry>
+            <entry name="svc-rsh"><protocol><tcp><port>514</port></tcp></protocol><description>rsh - INSECURE legacy remote shell</description></entry>
+            <entry name="svc-rlogin"><protocol><tcp><port>513</port></tcp></protocol><description>rlogin - INSECURE legacy remote login</description></entry>
+
+            <!-- File Transfer -->
+            <entry name="svc-ftp-ctrl"><protocol><tcp><port>21</port></tcp></protocol><description>FTP control - INSECURE cleartext</description></entry>
+            <entry name="svc-ftp-data"><protocol><tcp><port>20</port></tcp></protocol><description>FTP data - INSECURE cleartext</description></entry>
+            <entry name="svc-ftps"><protocol><tcp><port>990</port></tcp></protocol><description>FTPS - encrypted FTP</description></entry>
+            <entry name="svc-sftp"><protocol><tcp><port>22</port></tcp></protocol><description>SFTP over SSH</description></entry>
+            <entry name="svc-tftp"><protocol><udp><port>69</port></udp></protocol><description>TFTP - trivial file transfer</description></entry>
+            <entry name="svc-smb"><protocol><tcp><port>445</port></tcp></protocol><description>SMB - CVE-2017-0144 EternalBlue ransomware</description></entry>
+            <entry name="svc-netbios-ssn"><protocol><tcp><port>139</port></tcp></protocol><description>NetBIOS session</description></entry>
+            <entry name="svc-netbios-ns"><protocol><udp><port>137</port></udp></protocol><description>NetBIOS name service</description></entry>
+            <entry name="svc-nfs"><protocol><tcp><port>2049</port></tcp></protocol><description>NFS file sharing</description></entry>
+
+            <!-- Email -->
+            <entry name="svc-smtp"><protocol><tcp><port>25</port></tcp></protocol><description>SMTP - email relay</description></entry>
+            <entry name="svc-smtp-submission"><protocol><tcp><port>587</port></tcp></protocol><description>SMTP submission</description></entry>
+            <entry name="svc-smtps"><protocol><tcp><port>465</port></tcp></protocol><description>SMTPS encrypted</description></entry>
+            <entry name="svc-imap"><protocol><tcp><port>143</port></tcp></protocol><description>IMAP email</description></entry>
+            <entry name="svc-imaps"><protocol><tcp><port>993</port></tcp></protocol><description>IMAPS encrypted</description></entry>
+            <entry name="svc-pop3"><protocol><tcp><port>110</port></tcp></protocol><description>POP3 email</description></entry>
+            <entry name="svc-pop3s"><protocol><tcp><port>995</port></tcp></protocol><description>POP3S encrypted</description></entry>
+
+            <!-- Databases - CROWN JEWEL PORTS -->
+            <entry name="svc-mysql"><protocol><tcp><port>3306</port></tcp></protocol><description>MySQL - CROWN JEWEL port</description></entry>
+            <entry name="svc-mssql"><protocol><tcp><port>1433</port></tcp></protocol><description>MSSQL - CROWN JEWEL port</description></entry>
+            <entry name="svc-oracle"><protocol><tcp><port>1521</port></tcp></protocol><description>Oracle DB - CROWN JEWEL port</description></entry>
+            <entry name="svc-postgres"><protocol><tcp><port>5432</port></tcp></protocol><description>PostgreSQL - CROWN JEWEL port</description></entry>
+            <entry name="svc-mongodb"><protocol><tcp><port>27017</port></tcp></protocol><description>MongoDB - unauthenticated by default HIGH RISK</description></entry>
+            <entry name="svc-redis"><protocol><tcp><port>6379</port></tcp></protocol><description>Redis - no auth by default HIGH RISK</description></entry>
+            <entry name="svc-elasticsearch"><protocol><tcp><port>9200</port></tcp></protocol><description>Elasticsearch - no auth by default</description></entry>
+            <entry name="svc-elasticsearch-cluster"><protocol><tcp><port>9300</port></tcp></protocol><description>Elasticsearch cluster</description></entry>
+            <entry name="svc-cassandra"><protocol><tcp><port>9042</port></tcp></protocol><description>Cassandra DB</description></entry>
+            <entry name="svc-couchdb"><protocol><tcp><port>5984</port></tcp></protocol><description>CouchDB</description></entry>
+            <entry name="svc-memcached"><protocol><tcp><port>11211</port></tcp></protocol><description>Memcached - unauthenticated amplification risk</description></entry>
+            <entry name="svc-mssql-browser"><protocol><udp><port>1434</port></udp></protocol><description>MSSQL Browser service</description></entry>
+
+            <!-- Directory Services -->
+            <entry name="svc-ldap"><protocol><tcp><port>389</port></tcp></protocol><description>LDAP - unencrypted directory service</description></entry>
+            <entry name="svc-ldaps"><protocol><tcp><port>636</port></tcp></protocol><description>LDAPS - encrypted LDAP</description></entry>
+            <entry name="svc-kerberos"><protocol><tcp><port>88</port></tcp></protocol><description>Kerberos authentication</description></entry>
+            <entry name="svc-msrpc"><protocol><tcp><port>135</port></tcp></protocol><description>MSRPC endpoint mapper - DCOM</description></entry>
+            <entry name="svc-global-catalog"><protocol><tcp><port>3268</port></tcp></protocol><description>AD Global Catalog</description></entry>
+
+            <!-- Network Management -->
+            <entry name="svc-snmp"><protocol><udp><port>161</port></udp></protocol><description>SNMP v1/v2 - community string risk</description></entry>
+            <entry name="svc-snmp-trap"><protocol><udp><port>162</port></udp></protocol><description>SNMP trap</description></entry>
+            <entry name="svc-syslog"><protocol><udp><port>514</port></udp></protocol><description>Syslog</description></entry>
+            <entry name="svc-netflow"><protocol><udp><port>9995</port></udp></protocol><description>NetFlow traffic analysis</description></entry>
+            <entry name="svc-ntp"><protocol><udp><port>123</port></udp></protocol><description>NTP time synchronisation</description></entry>
+
+            <!-- DNS -->
+            <entry name="svc-dns-udp"><protocol><udp><port>53</port></udp></protocol><description>DNS UDP - amplification attack risk</description></entry>
+            <entry name="svc-dns-tcp"><protocol><tcp><port>53</port></tcp></protocol><description>DNS TCP zone transfer</description></entry>
+
+            <!-- VPN -->
+            <entry name="svc-ipsec-isakmp"><protocol><udp><port>500</port></udp></protocol><description>IPSec IKE</description></entry>
+            <entry name="svc-ipsec-nat-t"><protocol><udp><port>4500</port></udp></protocol><description>IPSec NAT traversal</description></entry>
+            <entry name="svc-openvpn"><protocol><udp><port>1194</port></udp></protocol><description>OpenVPN</description></entry>
+            <entry name="svc-l2tp"><protocol><udp><port>1701</port></udp></protocol><description>L2TP VPN</description></entry>
+            <entry name="svc-pptp"><protocol><tcp><port>1723</port></tcp></protocol><description>PPTP VPN - weak encryption</description></entry>
+
+            <!-- OT/SCADA -->
+            <entry name="svc-modbus"><protocol><tcp><port>502</port></tcp></protocol><description>Modbus - industrial protocol NO AUTH</description></entry>
+            <entry name="svc-dnp3"><protocol><tcp><port>20000</port></tcp></protocol><description>DNP3 - SCADA protocol</description></entry>
+            <entry name="svc-bacnet"><protocol><udp><port>47808</port></udp></protocol><description>BACnet - building automation</description></entry>
+            <entry name="svc-s7comm"><protocol><tcp><port>102</port></tcp></protocol><description>S7comm - Siemens PLC protocol</description></entry>
+            <entry name="svc-profinet"><protocol><udp><port>34964</port></udp></protocol><description>PROFINET industrial</description></entry>
+
+            <!-- Known C2 and Malware Ports -->
+            <entry name="svc-metasploit"><protocol><tcp><port>4444</port></tcp></protocol><description>KNOWN C2: Metasploit default handler</description></entry>
+            <entry name="svc-cobalt-strike"><protocol><tcp><port>50050</port></tcp></protocol><description>KNOWN C2: Cobalt Strike default</description></entry>
+            <entry name="svc-tor"><protocol><tcp><port>9001</port></tcp></protocol><description>Tor relay port</description></entry>
+            <entry name="svc-tor-control"><protocol><tcp><port>9051</port></tcp></protocol><description>Tor control port</description></entry>
+            <entry name="svc-crypto-mining"><protocol><tcp><port>3333</port></tcp></protocol><description>Cryptomining pool common port</description></entry>
+
+            <!-- Application Services -->
+            <entry name="svc-docker"><protocol><tcp><port>2375</port></tcp></protocol><description>Docker daemon - UNAUTHENTICATED if exposed</description></entry>
+            <entry name="svc-docker-tls"><protocol><tcp><port>2376</port></tcp></protocol><description>Docker daemon TLS</description></entry>
+            <entry name="svc-kubernetes"><protocol><tcp><port>6443</port></tcp></protocol><description>Kubernetes API server</description></entry>
+            <entry name="svc-etcd"><protocol><tcp><port>2379</port></tcp></protocol><description>etcd - Kubernetes secrets store</description></entry>
+            <entry name="svc-jenkins"><protocol><tcp><port>8080</port></tcp></protocol><description>Jenkins CI/CD - often unauthenticated</description></entry>
+            <entry name="svc-grafana"><protocol><tcp><port>3000</port></tcp></protocol><description>Grafana monitoring dashboard</description></entry>
+            <entry name="svc-prometheus"><protocol><tcp><port>9090</port></tcp></protocol><description>Prometheus metrics - sensitive data</description></entry>
+            <entry name="svc-rabbitmq-mgmt"><protocol><tcp><port>15672</port></tcp></protocol><description>RabbitMQ management - default admin/admin</description></entry>
+            <entry name="svc-kafka"><protocol><tcp><port>9092</port></tcp></protocol><description>Apache Kafka - no auth by default</description></entry>
+            <entry name="svc-zookeeper"><protocol><tcp><port>2181</port></tcp></protocol><description>ZooKeeper - unauthenticated by default</description></entry>
+          </service>
+
+          <!-- ============================================================ -->
+          <!-- SERVICE GROUPS                                                -->
+          <!-- ============================================================ -->
+          <service-group>
+            <entry name="web-services">
+              <members>
+                <member>svc-http</member>
+                <member>svc-https</member>
+              </members>
+              <description>Standard web ports</description>
+            </entry>
+            <entry name="database-ports">
+              <members>
+                <member>svc-mysql</member>
+                <member>svc-mssql</member>
+                <member>svc-oracle</member>
+                <member>svc-postgres</member>
+                <member>svc-mongodb</member>
+                <member>svc-redis</member>
+                <member>svc-elasticsearch</member>
+                <member>svc-cassandra</member>
+              </members>
+              <description>All database service ports - crown jewel access</description>
+            </entry>
+            <entry name="cleartext-protocols">
+              <members>
+                <member>svc-telnet</member>
+                <member>svc-ftp-ctrl</member>
+                <member>svc-http</member>
+                <member>svc-ldap</member>
+                <member>svc-snmp</member>
+                <member>svc-rsh</member>
+                <member>svc-rlogin</member>
+                <member>svc-rexec</member>
+              </members>
+              <description>Insecure cleartext protocols - should be replaced</description>
+            </entry>
+            <entry name="remote-access-high-risk">
+              <members>
+                <member>svc-rdp</member>
+                <member>svc-vnc</member>
+                <member>svc-telnet</member>
+                <member>svc-winrm-http</member>
+              </members>
+              <description>High risk remote access ports</description>
+            </entry>
+            <entry name="known-c2-ports">
+              <members>
+                <member>svc-metasploit</member>
+                <member>svc-cobalt-strike</member>
+                <member>svc-tor</member>
+                <member>svc-crypto-mining</member>
+              </members>
+              <description>Known C2 and malware communication ports</description>
+            </entry>
+            <entry name="ot-scada-protocols">
+              <members>
+                <member>svc-modbus</member>
+                <member>svc-dnp3</member>
+                <member>svc-bacnet</member>
+                <member>svc-s7comm</member>
+                <member>svc-profinet</member>
+              </members>
+              <description>OT/SCADA industrial protocols</description>
+            </entry>
+          </service-group>
+
+          <!-- ============================================================ -->
+          <!-- SCHEDULES                                                     -->
+          <!-- ============================================================ -->
+          <schedule>
+            <entry name="business-hours">
+              <schedule-type>
+                <recurring>
+                  <weekly>
+                    <monday>08:00-18:00</monday>
+                    <tuesday>08:00-18:00</tuesday>
+                    <wednesday>08:00-18:00</wednesday>
+                    <thursday>08:00-18:00</thursday>
+                    <friday>08:00-18:00</friday>
+                  </weekly>
+                </recurring>
+              </schedule-type>
+              <description>Monday to Friday 8am to 6pm IST</description>
+            </entry>
+            <entry name="maintenance-window">
+              <schedule-type>
+                <recurring>
+                  <weekly>
+                    <sunday>02:00-06:00</sunday>
+                  </weekly>
+                </recurring>
+              </schedule-type>
+              <description>Sunday 2am-6am maintenance window</description>
+            </entry>
+            <entry name="expired-schedule">
+              <schedule-type>
+                <non-recurring>
+                  <start-time>2024-01-01@00:00</start-time>
+                  <end-time>2024-03-31@23:59</end-time>
+                </non-recurring>
+              </schedule-type>
+              <description>EXPIRED: Q1 2024 contractor access - should be removed</description>
+            </entry>
+          </schedule>
+
+          <!-- ============================================================ -->
+          <!-- TAGS                                                          -->
+          <!-- ============================================================ -->
+          <tag>
+            <entry name="crown-jewel"><color>color2</color><comments>Highest value asset - maximum protection</comments></entry>
+            <entry name="critical-risk"><color>color3</color><comments>Critical risk - immediate action required</comments></entry>
+            <entry name="high-risk"><color>color4</color><comments>High risk - action required this week</comments></entry>
+            <entry name="stale"><color>color5</color><comments>No traffic 90+ days - review for removal</comments></entry>
+            <entry name="pci-scope"><color>color6</color><comments>PCI DSS cardholder data environment</comments></entry>
+            <entry name="gdpr-sensitive"><color>color7</color><comments>GDPR personal data in scope</comments></entry>
+            <entry name="threat-intel"><color>color8</color><comments>From threat intelligence feed</comments></entry>
+            <entry name="ot-scada"><color>color9</color><comments>OT/SCADA industrial system</comments></entry>
+            <entry name="compliance-violation"><color>color10</color><comments>Violates security policy or compliance standard</comments></entry>
+            <entry name="shadowed"><color>color11</color><comments>Rule shadowed by another - never fires</comments></entry>
+            <entry name="redundant"><color>color12</color><comments>Duplicate rule - can be consolidated</comments></entry>
+          </tag>
+
+          <!-- ============================================================ -->
+          <!-- SECURITY RULES                                                -->
+          <!-- ============================================================ -->
+          <rulebase>
+            <security>
+              <rules>
+
+                <!-- RULE 1: Threat Intel Block - should be first -->
+                <entry name="block-known-malicious-ips" uuid="11111111-1111-1111-1111-111111111111">
+                  <from><member>any</member></from>
+                  <to><member>any</member></to>
+                  <source><member>threat-intel-ips</member></source>
+                  <destination><member>any</member></destination>
+                  <application><member>any</member></application>
+                  <service><member>any</member></service>
+                  <action>deny</action>
+                  <log-start>yes</log-start>
+                  <log-end>yes</log-end>
+                  <log-setting>default</log-setting>
+                  <disabled>no</disabled>
+                  <rule-type>universal</rule-type>
+                  <tag><member>threat-intel</member></tag>
+                  <description>Block all known malicious IPs from threat intelligence feeds</description>
+                  <profile-setting><group><member>default</member></group></profile-setting>
+                  <audit-info>
+                    <created-by>security-admin</created-by>
+                    <created-time>2026-01-15T09:00:00Z</created-time>
+                    <last-modified-by>security-admin</last-modified-by>
+                    <last-modified-time>2026-03-01T14:00:00Z</last-modified-time>
+                    <ticket-id>SEC-001</ticket-id>
+                    <review-date>2026-12-31</review-date>
+                  </audit-info>
+                </entry>
+
+                <!-- RULE 2: Good - Web to DMZ with full inspection -->
+                <entry name="allow-internet-to-web" uuid="22222222-2222-2222-2222-222222222222">
+                  <from><member>untrust</member></from>
+                  <to><member>dmz</member></to>
+                  <source><member>any</member></source>
+                  <destination><member>all-web-servers</member></destination>
+                  <application><member>web-browsing</member><member>ssl</member></application>
+                  <service><member>svc-http</member><member>svc-https</member></service>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>yes</log-end>
+                  <log-setting>default</log-setting>
+                  <disabled>no</disabled>
+                  <rule-type>universal</rule-type>
+                  <tag><member>web</member></tag>
+                  <description>Allow HTTP/HTTPS from internet to DMZ web servers only</description>
+                  <profile-setting>
+                    <profiles>
+                      <virus><member>default</member></virus>
+                      <vulnerability><member>strict</member></vulnerability>
+                      <url-filtering><member>default</member></url-filtering>
+                      <wildfire-analysis><member>default</member></wildfire-analysis>
+                    </profiles>
+                  </profile-setting>
+                  <qos>
+                    <marking><ip-dscp>af41</ip-dscp></marking>
+                  </qos>
+                  <audit-info>
+                    <created-by>network-admin</created-by>
+                    <created-time>2025-06-01T10:00:00Z</created-time>
+                    <ticket-id>NET-042</ticket-id>
+                    <review-date>2027-01-01</review-date>
+                  </audit-info>
+                </entry>
+
+                <!-- RULE 3: CRITICAL - RDP exposed to entire internet -->
+                <entry name="CRITICAL-rdp-internet-exposed" uuid="33333333-3333-3333-3333-333333333333">
+                  <from><member>untrust</member></from>
+                  <to><member>trust</member></to>
+                  <source><member>any</member></source>
+                  <destination><member>any</member></destination>
+                  <application><member>msrdp</member></application>
+                  <service><member>svc-rdp</member></service>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>no</log-end>
+                  <disabled>no</disabled>
+                  <rule-type>universal</rule-type>
+                  <tag><member>critical-risk</member></tag>
+                  <description>CRITICAL RISK: RDP 3389 open to entire internet. CVE-2019-0708 BlueKeep. No logging enabled. Attacker can reach all internal systems.</description>
+                  <vulnerability>
+                    <cve>CVE-2019-0708</cve>
+                    <cvss>9.8</cvss>
+                    <description>BlueKeep - Unauthenticated RCE via RDP</description>
+                  </vulnerability>
+                  <wildcard-usage>
+                    <source-any>yes</source-any>
+                    <destination-any>yes</destination-any>
+                  </wildcard-usage>
+                  <audit-info>
+                    <created-by>unknown</created-by>
+                    <created-time>2024-03-15T00:00:00Z</created-time>
+                    <ticket-id>NONE</ticket-id>
+                    <review-date>OVERDUE</review-date>
+                  </audit-info>
+                </entry>
+
+                <!-- RULE 4: CRITICAL - Direct internet to database -->
+                <entry name="CRITICAL-internet-to-database-direct" uuid="44444444-4444-4444-4444-444444444444">
+                  <from><member>untrust</member></from>
+                  <to><member>database_servers</member></to>
+                  <source><member>any</member></source>
+                  <destination><member>db-primary</member></destination>
+                  <application><member>mysql</member></application>
+                  <service><member>svc-mysql</member></service>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>no</log-end>
+                  <disabled>no</disabled>
+                  <rule-type>universal</rule-type>
+                  <tag><member>critical-risk</member><member>crown-jewel</member></tag>
+                  <description>CRITICAL: MySQL 3306 directly accessible from internet. Crown jewel asset exposed. Customer data at risk. PCI DSS violation.</description>
+                  <vulnerability>
+                    <cvss>10.0</cvss>
+                    <attack-vector>Network</attack-vector>
+                    <attack-complexity>Low</attack-complexity>
+                    <privileges-required>None</privileges-required>
+                    <user-interaction>None</user-interaction>
+                    <scope>Changed</scope>
+                    <confidentiality-impact>High</confidentiality-impact>
+                    <integrity-impact>High</integrity-impact>
+                    <availability-impact>High</availability-impact>
+                  </vulnerability>
+                  <wildcard-usage>
+                    <source-any>yes</source-any>
+                  </wildcard-usage>
+                  <audit-info>
+                    <created-by>db-admin</created-by>
+                    <created-time>2023-11-20T00:00:00Z</created-time>
+                    <ticket-id>NONE</ticket-id>
+                  </audit-info>
+                </entry>
+
+                <!-- RULE 5: CRITICAL - Telnet and cleartext protocols -->
+                <entry name="RISK-cleartext-protocols-allowed" uuid="55555555-5555-5555-5555-555555555555">
+                  <from><member>trust</member></from>
+                  <to><member>dmz</member></to>
+                  <source><member>internal-subnet</member></source>
+                  <destination><member>any</member></destination>
+                  <application><member>telnet</member><member>ftp</member></application>
+                  <service><member>svc-telnet</member><member>svc-ftp-ctrl</member></service>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <rule-type>universal</rule-type>
+                  <tag><member>high-risk</member></tag>
+                  <description>RISK: Telnet and FTP cleartext protocols allowed. Credentials transmitted in plaintext. Should be replaced with SSH and SFTP.</description>
+                  <audit-info>
+                    <created-by>legacy-admin</created-by>
+                    <created-time>2020-01-01T00:00:00Z</created-time>
+                    <ticket-id>LEGACY-001</ticket-id>
+                  </audit-info>
+                </entry>
+
+                <!-- RULE 6: Overly permissive any/any -->
+                <entry name="RISK-overly-permissive-any-any" uuid="66666666-6666-6666-6666-666666666666">
+                  <from><member>trust</member></from>
+                  <to><member>dmz</member></to>
+                  <source><member>any</member></source>
+                  <destination><member>any</member></destination>
+                  <application><member>any</member></application>
+                  <service><member>any</member></service>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>no</log-end>
+                  <disabled>no</disabled>
+                  <rule-type>universal</rule-type>
+                  <tag><member>high-risk</member></tag>
+                  <description>RISK: Any source, any destination, any port, any application, no logging. Maximally permissive rule violating least privilege principle.</description>
+                  <wildcard-usage>
+                    <source-any>yes</source-any>
+                    <destination-any>yes</destination-any>
+                    <port-any>yes</port-any>
+                    <application-any>yes</application-any>
+                  </wildcard-usage>
+                  <port-range-size>65535</port-range-size>
+                  <audit-info>
+                    <created-by>unknown</created-by>
+                    <created-time>2022-05-10T00:00:00Z</created-time>
+                    <ticket-id>NONE</ticket-id>
+                  </audit-info>
+                </entry>
+
+                <!-- RULE 7: Shadowed by rule 6 - never fires -->
+                <entry name="SHADOWED-deny-internal-to-web" uuid="77777777-7777-7777-7777-777777777777">
+                  <from><member>trust</member></from>
+                  <to><member>dmz</member></to>
+                  <source><member>internal-subnet</member></source>
+                  <destination><member>web-server-primary</member></destination>
+                  <application><member>web-browsing</member></application>
+                  <service><member>svc-http</member></service>
+                  <action>deny</action>
+                  <log-start>yes</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <rule-type>universal</rule-type>
+                  <tag><member>shadowed</member></tag>
+                  <description>SHADOWED: This deny rule is completely ineffective. Rule 6 above matches the same traffic first. This rule never fires.</description>
+                  <overlapping-rules>
+                    <shadowed-by>RISK-overly-permissive-any-any</shadowed-by>
+                  </overlapping-rules>
+                  <audit-info>
+                    <created-by>security-admin</created-by>
+                    <created-time>2023-02-14T00:00:00Z</created-time>
+                    <ticket-id>SEC-102</ticket-id>
+                  </audit-info>
+                </entry>
+
+                <!-- RULE 8: Stale - zero hits 180 days -->
+                <entry name="STALE-old-vendor-access" uuid="88888888-8888-8888-8888-888888888888">
+                  <from><member>untrust</member></from>
+                  <to><member>trust</member></to>
+                  <source><member>203.0.114.0/24</member></source>
+                  <destination><member>erp-server</member></destination>
+                  <application><member>sap-rfc</member></application>
+                  <service><member>application-default</member></service>
+                  <action>allow</action>
+                  <log-start>yes</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <rule-type>universal</rule-type>
+                  <tag><member>stale</member></tag>
+                  <description>STALE: Vendor maintenance access for TechCorp. Last hit 180 days ago. Vendor contract expired. Should be removed immediately.</description>
+                  <hit-count>
+                    <count>0</count>
+                    <last-hit>2025-09-15T10:00:00Z</last-hit>
+                    <days-since-last-hit>180</days-since-last-hit>
+                  </hit-count>
+                  <audit-info>
+                    <created-by>vendor-admin</created-by>
+                    <created-time>2023-06-01T00:00:00Z</created-time>
+                    <ticket-id>VENDOR-2023-001</ticket-id>
+                    <review-date>OVERDUE-2024-12-31</review-date>
+                    <owner>procurement@company.com</owner>
+                  </audit-info>
+                </entry>
+
+                <!-- RULE 9: Expired schedule -->
+                <entry name="EXPIRED-contractor-access" uuid="99999999-9999-9999-9999-999999999999">
+                  <from><member>untrust</member></from>
+                  <to><member>development</member></to>
+                  <source><member>any</member></source>
+                  <destination><member>dev-subnet</member></destination>
+                  <application><member>ssh</member></application>
+                  <service><member>svc-ssh</member></service>
+                  <action>allow</action>
+                  <log-start>yes</log-start>
+                  <log-end>yes</log-end>
+                  <schedule>expired-schedule</schedule>
+                  <disabled>no</disabled>
+                  <rule-type>universal</rule-type>
+                  <tag><member>stale</member></tag>
+                  <description>EXPIRED SCHEDULE: Q1 2024 contractor access. Schedule expired March 2024 but rule still exists. Should be deleted.</description>
+                  <audit-info>
+                    <created-by>it-admin</created-by>
+                    <created-time>2024-01-01T00:00:00Z</created-time>
+                    <ticket-id>IT-2024-055</ticket-id>
+                    <review-date>OVERDUE</review-date>
+                  </audit-info>
+                </entry>
+
+                <!-- RULE 10: SMB lateral movement risk -->
+                <entry name="RISK-smb-unrestricted-internal" uuid="aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa">
+                  <from><member>trust</member></from>
+                  <to><member>trust</member></to>
+                  <source><member>any</member></source>
+                  <destination><member>any</member></destination>
+                  <application><member>msrpc-base</member><member>ms-ds-replication</member></application>
+                  <service><member>svc-smb</member><member>svc-netbios-ssn</member></service>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>no</log-end>
+                  <disabled>no</disabled>
+                  <rule-type>universal</rule-type>
+                  <tag><member>high-risk</member></tag>
+                  <description>RISK: SMB 445 unrestricted between all internal hosts. CVE-2017-0144 EternalBlue - WannaCry ransomware vector. Critical lateral movement risk.</description>
+                  <vulnerability>
+                    <cve>CVE-2017-0144</cve>
+                    <cvss>9.3</cvss>
+                    <description>EternalBlue - MS17-010 SMB Remote Code Execution</description>
+                  </vulnerability>
+                  <audit-info>
+                    <created-by>legacy-admin</created-by>
+                    <created-time>2018-01-01T00:00:00Z</created-time>
+                    <ticket-id>LEGACY-SMB-001</ticket-id>
+                  </audit-info>
+                </entry>
+
+                <!-- RULE 11: Guest to internal - isolation failure -->
+                <entry name="CRITICAL-guest-reaches-internal" uuid="bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb">
+                  <from><member>guest</member></from>
+                  <to><member>trust</member></to>
+                  <source><member>guest-subnet</member></source>
+                  <destination><member>internal-subnet</member></destination>
+                  <application><member>any</member></application>
+                  <service><member>any</member></service>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>no</log-end>
+                  <disabled>no</disabled>
+                  <rule-type>universal</rule-type>
+                  <tag><member>critical-risk</member></tag>
+                  <description>CRITICAL: Guest WiFi network has unrestricted access to internal corporate network. Zone isolation completely broken. Any visitor on WiFi can reach crown jewel assets.</description>
+                  <wildcard-usage>
+                    <application-any>yes</application-any>
+                    <port-any>yes</port-any>
+                  </wildcard-usage>
+                  <audit-info>
+                    <created-by>it-helpdesk</created-by>
+                    <created-time>2024-08-22T00:00:00Z</created-time>
+                    <ticket-id>HELPDESK-8821</ticket-id>
+                  </audit-info>
+                </entry>
+
+                <!-- RULE 12: IoT to internal - pivot risk -->
+                <entry name="RISK-iot-to-internal" uuid="cccccccc-cccc-cccc-cccc-cccccccccccc">
+                  <from><member>iot</member></from>
+                  <to><member>trust</member></to>
+                  <source><member>iot-subnet</member></source>
+                  <destination><member>internal-subnet</member></destination>
+                  <application><member>any</member></application>
+                  <service><member>any</member></service>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <rule-type>universal</rule-type>
+                  <tag><member>high-risk</member></tag>
+                  <description>RISK: IoT devices can reach internal network. IoT devices frequently unpatched and vulnerable. Compromised camera or printer becomes internal pivot point.</description>
+                  <audit-info>
+                    <created-by>facilities-team</created-by>
+                    <created-time>2025-01-10T00:00:00Z</created-time>
+                    <ticket-id>FAC-2025-001</ticket-id>
+                  </audit-info>
+                </entry>
+
+                <!-- RULE 13: OT/SCADA internet exposure - CRITICAL -->
+                <entry name="CRITICAL-scada-internet-exposure" uuid="dddddddd-dddd-dddd-dddd-dddddddddddd">
+                  <from><member>untrust</member></from>
+                  <to><member>ot_scada</member></to>
+                  <source><member>any</member></source>
+                  <destination><member>scada-controller</member></destination>
+                  <application><member>any</member></application>
+                  <service><member>svc-modbus</member><member>svc-s7comm</member></service>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>no</log-end>
+                  <disabled>no</disabled>
+                  <rule-type>universal</rule-type>
+                  <tag><member>critical-risk</member><member>ot-scada</member><member>crown-jewel</member></tag>
+                  <description>CRITICAL NATIONAL SECURITY RISK: Industrial SCADA PLC controller directly accessible from internet via Modbus and S7comm. No authentication. Physical damage to infrastructure possible. Report to CERT-In immediately.</description>
+                  <vulnerability>
+                    <cvss>10.0</cvss>
+                    <attack-vector>Network</attack-vector>
+                    <attack-complexity>Low</attack-complexity>
+                    <privileges-required>None</privileges-required>
+                    <description>Unauthenticated access to industrial control system</description>
+                  </vulnerability>
+                  <audit-info>
+                    <created-by>ot-admin</created-by>
+                    <created-time>2024-12-01T00:00:00Z</created-time>
+                    <ticket-id>OT-2024-URGENT</ticket-id>
+                  </audit-info>
+                </entry>
+
+                <!-- RULE 14: DMZ to database - pivot point -->
+                <entry name="dmz-to-database-pivot" uuid="eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee">
+                  <from><member>dmz</member></from>
+                  <to><member>database_servers</member></to>
+                  <source><member>dmz-subnet</member></source>
+                  <destination><member>all-database-servers</member></destination>
+                  <application><member>mysql</member><member>mssql</member></application>
+                  <service><member>svc-mysql</member><member>svc-mssql</member><member>svc-oracle</member></service>
+                  <action>allow</action>
+                  <log-start>yes</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <rule-type>universal</rule-type>
+                  <description>DMZ web servers to database backend. If web server compromised, attacker reaches ALL databases. Should be source-restricted to specific web server IPs only.</description>
+                  <audit-info>
+                    <created-by>app-team</created-by>
+                    <created-time>2025-03-01T00:00:00Z</created-time>
+                    <ticket-id>APP-2025-003</ticket-id>
+                    <review-date>2026-03-01</review-date>
+                  </audit-info>
+                </entry>
+
+                <!-- RULE 15: MongoDB internet exposed -->
+                <entry name="CRITICAL-mongodb-internet" uuid="ffffffff-ffff-ffff-ffff-ffffffffffff">
+                  <from><member>untrust</member></from>
+                  <to><member>database_servers</member></to>
+                  <source><member>any</member></source>
+                  <destination><member>db-mongodb</member></destination>
+                  <application><member>any</member></application>
+                  <service><member>svc-mongodb</member></service>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>no</log-end>
+                  <disabled>no</disabled>
+                  <rule-type>universal</rule-type>
+                  <tag><member>critical-risk</member><member>crown-jewel</member></tag>
+                  <description>CRITICAL: MongoDB 27017 internet exposed. No authentication by default. Analytics data including user profiles at risk. Thousands of databases compromised globally via this misconfiguration.</description>
+                  <audit-info>
+                    <created-by>data-team</created-by>
+                    <created-time>2025-02-14T00:00:00Z</created-time>
+                    <ticket-id>DATA-2025-007</ticket-id>
+                  </audit-info>
+                </entry>
+
+                <!-- RULE 16: Redundant duplicate of rule 2 -->
+                <entry name="REDUNDANT-duplicate-web-rule" uuid="11111112-1112-1112-1112-111111111112">
+                  <from><member>untrust</member></from>
+                  <to><member>dmz</member></to>
+                  <source><member>any</member></source>
+                  <destination><member>all-web-servers</member></destination>
+                  <application><member>web-browsing</member><member>ssl</member></application>
+                  <service><member>svc-http</member><member>svc-https</member></service>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <rule-type>universal</rule-type>
+                  <tag><member>redundant</member></tag>
+                  <description>REDUNDANT: Exact duplicate of allow-internet-to-web rule. Serves no purpose. Creates confusion during audits. Should be removed.</description>
+                  <overlapping-rules>
+                    <duplicate-of>allow-internet-to-web</duplicate-of>
+                  </overlapping-rules>
+                  <audit-info>
+                    <created-by>contractor-2025</created-by>
+                    <created-time>2025-07-15T00:00:00Z</created-time>
+                    <ticket-id>NONE</ticket-id>
+                  </audit-info>
+                </entry>
+
+                <!-- RULE 17: Docker daemon internet exposed -->
+                <entry name="CRITICAL-docker-daemon-exposed" uuid="11111113-1113-1113-1113-111111111113">
+                  <from><member>untrust</member></from>
+                  <to><member>development</member></to>
+                  <source><member>any</member></source>
+                  <destination><member>any</member></destination>
+                  <application><member>any</member></application>
+                  <service><member>svc-docker</member></service>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>no</log-end>
+                  <disabled>no</disabled>
+                  <rule-type>universal</rule-type>
+                  <tag><member>critical-risk</member></tag>
+                  <description>CRITICAL: Docker daemon port 2375 exposed to internet WITHOUT TLS. Unauthenticated. Attacker can run arbitrary containers, escape to host, pivot to entire dev network, access secrets and source code.</description>
+                  <vulnerability>
+                    <cvss>10.0</cvss>
+                    <attack-vector>Network</attack-vector>
+                    <privileges-required>None</privileges-required>
+                  </vulnerability>
+                  <audit-info>
+                    <created-by>devops-team</created-by>
+                    <created-time>2025-11-01T00:00:00Z</created-time>
+                    <ticket-id>DEVOPS-2025-099</ticket-id>
+                  </audit-info>
+                </entry>
+
+                <!-- RULE 18: Kubernetes API exposed -->
+                <entry name="CRITICAL-kubernetes-api-exposed" uuid="11111114-1114-1114-1114-111111111114">
+                  <from><member>untrust</member></from>
+                  <to><member>development</member></to>
+                  <source><member>any</member></source>
+                  <destination><member>any</member></destination>
+                  <application><member>any</member></application>
+                  <service><member>svc-kubernetes</member></service>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>no</log-end>
+                  <disabled>no</disabled>
+                  <rule-type>universal</rule-type>
+                  <tag><member>critical-risk</member></tag>
+                  <description>CRITICAL: Kubernetes API server port 6443 internet accessible. Attacker can deploy malicious workloads, access all secrets, move to production if namespaces are misconfigured.</description>
+                  <audit-info>
+                    <created-by>devops-team</created-by>
+                    <created-time>2025-10-15T00:00:00Z</created-time>
+                    <ticket-id>DEVOPS-2025-087</ticket-id>
+                  </audit-info>
+                </entry>
+
+                <!-- RULE 19: Disabled rule -->
+                <entry name="DISABLED-old-partner-vpn" uuid="11111115-1115-1115-1115-111111111115">
+                  <from><member>untrust</member></from>
+                  <to><member>trust</member></to>
+                  <source><member>198.51.200.0/24</member></source>
+                  <destination><member>erp-server</member></destination>
+                  <application><member>any</member></application>
+                  <service><member>any</member></service>
+                  <action>allow</action>
+                  <log-start>yes</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>yes</disabled>
+                  <rule-type>universal</rule-type>
+                  <description>DISABLED: Old partner ABC Corp VPN access rule. Partnership ended 2024. Rule disabled but not removed. Should be deleted to reduce clutter.</description>
+                  <audit-info>
+                    <created-by>partner-admin</created-by>
+                    <created-time>2022-03-01T00:00:00Z</created-time>
+                    <ticket-id>PARTNER-2022-001</ticket-id>
+                  </audit-info>
+                </entry>
+
+                <!-- RULE 20: PCI CDE violation -->
+                <entry name="CRITICAL-pci-violation-dev-to-cde" uuid="11111116-1116-1116-1116-111111111116">
+                  <from><member>development</member></from>
+                  <to><member>pci_cde</member></to>
+                  <source><member>dev-subnet</member></source>
+                  <destination><member>payment-gateway</member></destination>
+                  <application><member>any</member></application>
+                  <service><member>any</member></service>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>no</log-end>
+                  <disabled>no</disabled>
+                  <rule-type>universal</rule-type>
+                  <tag><member>critical-risk</member><member>pci-scope</member><member>compliance-violation</member></tag>
+                  <description>CRITICAL PCI DSS VIOLATION: Development network has direct access to PCI CDE payment gateway. PCI DSS Requirement 1.3 violation. Immediate audit finding. Can result in loss of card processing ability.</description>
+                  <compliance-violation>
+                    <standard>PCI-DSS-v4.0</standard>
+                    <requirement>1.3 - Network access controls</requirement>
+                    <severity>Critical</severity>
+                  </compliance-violation>
+                  <audit-info>
+                    <created-by>dev-lead</created-by>
+                    <created-time>2025-09-01T00:00:00Z</created-time>
+                    <ticket-id>DEV-2025-200</ticket-id>
+                  </audit-info>
+                </entry>
+
+                <!-- RULE 21: Known C2 ports allowed outbound -->
+                <entry name="RISK-c2-ports-allowed-outbound" uuid="11111117-1117-1117-1117-111111111117">
+                  <from><member>trust</member></from>
+                  <to><member>untrust</member></to>
+                  <source><member>internal-subnet</member></source>
+                  <destination><member>any</member></destination>
+                  <application><member>any</member></application>
+                  <service><member>svc-metasploit</member><member>svc-cobalt-strike</member></service>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>no</log-end>
+                  <disabled>no</disabled>
+                  <rule-type>universal</rule-type>
+                  <tag><member>critical-risk</member></tag>
+                  <description>CRITICAL: Known C2 framework ports 4444 (Metasploit) and 50050 (Cobalt Strike) allowed outbound. If any internal host is infected with malware using these ports, it can communicate freely with attacker C2 servers.</description>
+                  <audit-info>
+                    <created-by>unknown</created-by>
+                    <created-time>2024-06-01T00:00:00Z</created-time>
+                    <ticket-id>NONE</ticket-id>
+                  </audit-info>
+                </entry>
+
+                <!-- RULE 22: Management SSH allowed from internet -->
+                <entry name="RISK-ssh-management-internet" uuid="11111118-1118-1118-1118-111111111118">
+                  <from><member>untrust</member></from>
+                  <to><member>management</member></to>
+                  <source><member>any</member></source>
+                  <destination><member>mgmt-subnet</member></destination>
+                  <application><member>ssh</member></application>
+                  <service><member>svc-ssh</member></service>
+                  <action>allow</action>
+                  <log-start>yes</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <rule-type>universal</rule-type>
+                  <tag><member>high-risk</member></tag>
+                  <description>RISK: SSH management access allowed from entire internet to management zone. Should be restricted to specific admin IP ranges or VPN only. Exposed to automated SSH brute force attacks 24/7.</description>
+                  <vulnerability>
+                    <cvss>7.5</cvss>
+                    <attack-vector>Network</attack-vector>
+                    <attack-complexity>Low</attack-complexity>
+                    <description>Management interface internet exposure</description>
+                  </vulnerability>
+                  <audit-info>
+                    <created-by>it-ops</created-by>
+                    <created-time>2024-04-01T00:00:00Z</created-time>
+                    <ticket-id>OPS-2024-015</ticket-id>
+                  </audit-info>
+                </entry>
+
+                <!-- RULE 23: Branch VPN overly broad access -->
+                <entry name="branch-vpn-overly-broad" uuid="11111119-1119-1119-1119-111111111119">
+                  <from><member>vpn_branch</member></from>
+                  <to><member>trust</member></to>
+                  <source><member>branch-subnet</member></source>
+                  <destination><member>any</member></destination>
+                  <application><member>any</member></application>
+                  <service><member>any</member></service>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <rule-type>universal</rule-type>
+                  <tag><member>high-risk</member></tag>
+                  <description>RISK: Branch office has unrestricted access to entire internal network via VPN. If branch office is compromised, attacker has full access to headquarters. Should follow least privilege.</description>
+                  <audit-info>
+                    <created-by>network-team</created-by>
+                    <created-time>2024-01-15T00:00:00Z</created-time>
+                    <ticket-id>NET-2024-003</ticket-id>
+                  </audit-info>
+                </entry>
+
+                <!-- RULE 24: DNS amplification risk -->
+                <entry name="RISK-dns-open-resolver" uuid="11111120-1120-1120-1120-111111111120">
+                  <from><member>untrust</member></from>
+                  <to><member>dmz</member></to>
+                  <source><member>any</member></source>
+                  <destination><member>any</member></destination>
+                  <application><member>dns</member></application>
+                  <service><member>svc-dns-udp</member></service>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>no</log-end>
+                  <disabled>no</disabled>
+                  <rule-type>universal</rule-type>
+                  <tag><member>high-risk</member></tag>
+                  <description>RISK: Open DNS resolver accessible from internet. Can be used as amplification vector for DDoS attacks against third parties. Your infrastructure becomes part of an attack. UDP amplification factor up to 70x.</description>
+                  <audit-info>
+                    <created-by>dns-team</created-by>
+                    <created-time>2023-08-01T00:00:00Z</created-time>
+                    <ticket-id>DNS-2023-001</ticket-id>
+                  </audit-info>
+                </entry>
+
+                <!-- RULE 25: Business hours time-based rule -->
+                <entry name="allow-supplier-portal-business-hours" uuid="11111121-1121-1121-1121-111111111121">
+                  <from><member>untrust</member></from>
+                  <to><member>dmz</member></to>
+                  <source><member>203.0.200.0/24</member></source>
+                  <destination><member>api-gateway</member></destination>
+                  <application><member>ssl</member></application>
+                  <service><member>svc-https</member></service>
+                  <action>allow</action>
+                  <log-start>yes</log-start>
+                  <log-end>yes</log-end>
+                  <schedule>business-hours</schedule>
+                  <disabled>no</disabled>
+                  <rule-type>universal</rule-type>
+                  <description>Supplier portal access restricted to business hours only. Source: Supplier XYZ Ltd office range.</description>
+                  <audit-info>
+                    <created-by>supply-chain-it</created-by>
+                    <created-time>2025-04-01T00:00:00Z</created-time>
+                    <ticket-id>SCM-2025-011</ticket-id>
+                    <review-date>2026-04-01</review-date>
+                    <owner>supply-chain@company.com</owner>
+                  </audit-info>
+                </entry>
+
+                <!-- RULE 26: SNMP community string exposure -->
+                <entry name="RISK-snmp-internet-exposed" uuid="11111122-1122-1122-1122-111111111122">
+                  <from><member>untrust</member></from>
+                  <to><member>trust</member></to>
+                  <source><member>any</member></source>
+                  <destination><member>any</member></destination>
+                  <application><member>snmp</member></application>
+                  <service><member>svc-snmp</member></service>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>no</log-end>
+                  <disabled>no</disabled>
+                  <rule-type>universal</rule-type>
+                  <tag><member>high-risk</member></tag>
+                  <description>RISK: SNMP accessible from internet. SNMPv1/v2 uses cleartext community strings (often public/private). Attacker can read entire network topology, ARP tables, routing tables, and potentially write configs.</description>
+                  <audit-info>
+                    <created-by>noc-team</created-by>
+                    <created-time>2023-01-10T00:00:00Z</created-time>
+                    <ticket-id>NOC-2023-005</ticket-id>
+                  </audit-info>
+                </entry>
+
+                <!-- RULE 27: Properly configured VPN rule - good example -->
+                <entry name="allow-employee-vpn" uuid="11111123-1123-1123-1123-111111111123">
+                  <from><member>untrust</member></from>
+                  <to><member>management</member></to>
+                  <source><member>any</member></source>
+                  <destination><member>10.30.0.10</member></destination>
+                  <application><member>ike</member><member>ipsec-esp</member></application>
+                  <service><member>svc-ipsec-isakmp</member><member>svc-ipsec-nat-t</member></service>
+                  <action>allow</action>
+                  <log-start>yes</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <rule-type>universal</rule-type>
+                  <description>Allow employee IPSec VPN connections to VPN concentrator only. Properly scoped to specific destination.</description>
+                  <audit-info>
+                    <created-by>security-admin</created-by>
+                    <created-time>2025-01-01T00:00:00Z</created-time>
+                    <ticket-id>SEC-2025-001</ticket-id>
+                    <review-date>2026-01-01</review-date>
+                    <owner>security-team@company.com</owner>
+                  </audit-info>
+                </entry>
+
+                <!-- RULE 28: Redis Kafka Zookeeper big data exposure -->
+                <entry name="CRITICAL-bigdata-internet-exposed" uuid="11111124-1124-1124-1124-111111111124">
+                  <from><member>untrust</member></from>
+                  <to><member>database_servers</member></to>
+                  <source><member>any</member></source>
+                  <destination><member>any</member></destination>
+                  <application><member>any</member></application>
+                  <service><member>svc-redis</member><member>svc-kafka</member><member>svc-zookeeper</member><member>svc-elasticsearch</member></service>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>no</log-end>
+                  <disabled>no</disabled>
+                  <rule-type>universal</rule-type>
+                  <tag><member>critical-risk</member><member>crown-jewel</member></tag>
+                  <description>CRITICAL: Redis 6379, Kafka 9092, ZooKeeper 2181, Elasticsearch 9200 all internet exposed. All have no authentication by default. Full data access, potential RCE via Redis SLAVEOF, Kafka consumer group manipulation.</description>
+                  <audit-info>
+                    <created-by>data-engineering</created-by>
+                    <created-time>2025-08-01T00:00:00Z</created-time>
+                    <ticket-id>DATA-ENG-2025-055</ticket-id>
+                  </audit-info>
+                </entry>
+
+                <!-- IMPLICIT DENY - Must be last rule -->
+                <entry name="implicit-deny-all-log" uuid="ffffffff-fffe-fffe-fffe-fffffffffffe">
+                  <from><member>any</member></from>
+                  <to><member>any</member></to>
+                  <source><member>any</member></source>
+                  <destination><member>any</member></destination>
+                  <application><member>any</member></application>
+                  <service><member>any</member></service>
+                  <action>deny</action>
+                  <log-start>yes</log-start>
+                  <log-end>yes</log-end>
+                  <log-setting>default</log-setting>
+                  <disabled>no</disabled>
+                  <rule-type>universal</rule-type>
+                  <description>Implicit deny all - catch all rule - logs all unmatched traffic for forensic analysis</description>
+                  <audit-info>
+                    <created-by>security-admin</created-by>
+                    <created-time>2020-01-01T00:00:00Z</created-time>
+                    <ticket-id>SEC-BASELINE-001</ticket-id>
+                  </audit-info>
+                </entry>
+
+              </rules>
+            </security>
+
+            <!-- ============================================================ -->
+            <!-- NAT RULES                                                     -->
+            <!-- ============================================================ -->
+            <nat>
+              <rules>
+                <entry name="snat-internal-outbound" uuid="nat-0001">
+                  <from><member>trust</member></from>
+                  <to><member>untrust</member></to>
+                  <source><member>internal-subnet</member></source>
+                  <destination><member>any</member></destination>
+                  <nat-type>ipv4</nat-type>
+                  <source-translation>
+                    <dynamic-ip-and-port>
+                      <interface-address>
+                        <interface>ethernet1/1</interface>
+                      </interface-address>
+                    </dynamic-ip-and-port>
+                  </source-translation>
+                  <description>Source NAT for internal outbound traffic - hides internal IPs</description>
+                </entry>
+
+                <entry name="dnat-web-server-primary" uuid="nat-0002">
+                  <from><member>untrust</member></from>
+                  <to><member>untrust</member></to>
+                  <source><member>any</member></source>
+                  <destination><member>203.0.113.10</member></destination>
+                  <service>svc-http</service>
+                  <nat-type>ipv4</nat-type>
+                  <destination-translation>
+                    <translated-address>web-server-primary</translated-address>
+                    <translated-port>80</translated-port>
+                  </destination-translation>
+                  <description>DNAT HTTP to primary web server</description>
+                </entry>
+
+                <entry name="dnat-web-server-https" uuid="nat-0003">
+                  <from><member>untrust</member></from>
+                  <to><member>untrust</member></to>
+                  <source><member>any</member></source>
+                  <destination><member>203.0.113.10</member></destination>
+                  <service>svc-https</service>
+                  <nat-type>ipv4</nat-type>
+                  <destination-translation>
+                    <translated-address>web-server-primary</translated-address>
+                    <translated-port>443</translated-port>
+                  </destination-translation>
+                  <description>DNAT HTTPS to primary web server</description>
+                </entry>
+
+                <entry name="hairpin-nat-internal-to-public-vip" uuid="nat-0004">
+                  <from><member>trust</member></from>
+                  <to><member>trust</member></to>
+                  <source><member>internal-subnet</member></source>
+                  <destination><member>203.0.113.10</member></destination>
+                  <nat-type>ipv4</nat-type>
+                  <source-translation>
+                    <dynamic-ip-and-port>
+                      <interface-address>
+                        <interface>ethernet1/3</interface>
+                      </interface-address>
+                    </dynamic-ip-and-port>
+                  </source-translation>
+                  <destination-translation>
+                    <translated-address>web-server-primary</translated-address>
+                  </destination-translation>
+                  <description>Hairpin NAT - internal clients accessing web server via public IP - inefficient but functional</description>
+                </entry>
+              </rules>
+            </nat>
+
+            <!-- ============================================================ -->
+            <!-- DECRYPTION RULES                                              -->
+            <!-- ============================================================ -->
+            <decryption>
+              <rules>
+                <entry name="decrypt-outbound-ssl">
+                  <from><member>trust</member></from>
+                  <to><member>untrust</member></to>
+                  <source><member>internal-subnet</member></source>
+                  <destination><member>any</member></destination>
+                  <profile>forward-proxy-decrypt</profile>
+                  <action>decrypt</action>
+                  <type><ssl-forward-proxy/></type>
+                  <description>SSL forward proxy - decrypt outbound HTTPS for inspection</description>
+                  <log-success>yes</log-success>
+                  <log-fail>yes</log-fail>
+                </entry>
+                <entry name="no-decrypt-banking">
+                  <from><member>trust</member></from>
+                  <to><member>untrust</member></to>
+                  <source><member>internal-subnet</member></source>
+                  <destination><member>banking-category</member></destination>
+                  <action>no-decrypt</action>
+                  <description>Exempt banking and financial sites from SSL inspection for privacy</description>
+                </entry>
+              </rules>
+            </decryption>
+
+          </rulebase>
+
+          <!-- ============================================================ -->
+          <!-- SECURITY PROFILES                                             -->
+          <!-- ============================================================ -->
+          <profiles>
+            <virus>
+              <entry name="strict-av">
+                <decoder>
+                  <entry name="http"><action>block</action><wildfire-action>block</wildfire-action></entry>
+                  <entry name="smtp"><action>block</action></entry>
+                  <entry name="ftp"><action>block</action></entry>
+                  <entry name="smb"><action>block</action></entry>
+                </decoder>
+              </entry>
+            </virus>
+
+            <vulnerability>
+              <entry name="strict-ips">
+                <rules>
+                  <entry name="block-criticals">
+                    <action><block-ip><duration>3600</duration></block-ip></action>
+                    <severity><member>critical</member></severity>
+                    <cve><member>any</member></cve>
+                    <packet-capture>extended-capture</packet-capture>
+                  </entry>
+                  <entry name="block-highs">
+                    <action><block/></action>
+                    <severity><member>high</member></severity>
+                    <cve><member>any</member></cve>
+                  </entry>
+                </rules>
+              </entry>
+            </vulnerability>
+
+            <spyware>
+              <entry name="strict-antispyware">
+                <rules>
+                  <entry name="block-c2">
+                    <action><block-ip><duration>86400</duration></block-ip></action>
+                    <severity><member>critical</member><member>high</member></severity>
+                    <category>command-and-control</category>
+                  </entry>
+                </rules>
+                <botnet-networks>
+                  <inspection>
+                    <action>block</action>
+                    <packet-capture>single-packet</packet-capture>
+                  </inspection>
+                </botnet-networks>
+              </entry>
+            </spyware>
+
+            <wildfire-analysis>
+              <entry name="default">
+                <rules>
+                  <entry name="forward-all">
+                    <application><member>any</member></application>
+                    <file-type><member>any</member></file-type>
+                    <direction>both</direction>
+                    <analysis>public-cloud</analysis>
+                  </entry>
+                </rules>
+              </entry>
+            </wildfire-analysis>
+
+            <url-filtering>
+              <entry name="strict-url">
+                <action>
+                  <block>
+                    <member>malware</member>
+                    <member>phishing</member>
+                    <member>hacking</member>
+                    <member>command-and-control</member>
+                    <member>extremism</member>
+                    <member>unknown</member>
+                  </block>
+                  <alert>
+                    <member>gambling</member>
+                    <member>adult</member>
+                    <member>social-networking</member>
+                  </alert>
+                </action>
+              </entry>
+            </url-filtering>
+
+            <file-blocking>
+              <entry name="strict-file-blocking">
+                <rules>
+                  <entry name="block-dangerous">
+                    <application><member>any</member></application>
+                    <file-type>
+                      <member>pe</member>
+                      <member>ms-office</member>
+                      <member>jar</member>
+                      <member>flash</member>
+                      <member>pdf</member>
+                    </file-type>
+                    <direction>download</direction>
+                    <action>block</action>
+                  </entry>
+                </rules>
+              </entry>
+            </file-blocking>
+          </profiles>
+
+          <!-- ============================================================ -->
+          <!-- VPN / IPSEC TUNNELS                                           -->
+          <!-- ============================================================ -->
+          <tunnel>
+            <ipsec>
+              <entry name="vpn-branch-mumbai">
+                <tunnel-interface>tunnel.1</tunnel-interface>
+                <anti-replay>yes</anti-replay>
+                <copy-tos>yes</copy-tos>
+                <ike-gateway>branch-mumbai-gateway</ike-gateway>
+                <ipsec-crypto-profile>AES-256-SHA256</ipsec-crypto-profile>
+                <comment>Site-to-site VPN to Branch Office Mumbai - BRANCH-FW-01 Fortinet FortiGate 100F</comment>
+              </entry>
+              <entry name="vpn-aws-cloud">
+                <tunnel-interface>tunnel.2</tunnel-interface>
+                <anti-replay>yes</anti-replay>
+                <ike-gateway>aws-cloud-gateway</ike-gateway>
+                <ipsec-crypto-profile>AES-256-SHA256</ipsec-crypto-profile>
+                <comment>Site-to-site VPN to AWS ap-south-1 - CLOUD-FW-AWS-01 Palo Alto VM-Series</comment>
+              </entry>
+              <entry name="vpn-dr-site">
+                <tunnel-interface>tunnel.3</tunnel-interface>
+                <anti-replay>yes</anti-replay>
+                <ike-gateway>dr-site-gateway</ike-gateway>
+                <ipsec-crypto-profile>AES-256-SHA256</ipsec-crypto-profile>
+                <comment>Site-to-site VPN to Disaster Recovery site</comment>
+              </entry>
+            </ipsec>
+          </tunnel>
+
+          <!-- ============================================================ -->
+          <!-- APPLICATION OVERRIDE RULES                                    -->
+          <!-- ============================================================ -->
+          <application-override>
+            <rules>
+              <entry name="custom-app-override">
+                <from><member>trust</member></from>
+                <to><member>dmz</member></to>
+                <source><member>internal-subnet</member></source>
+                <destination><member>api-gateway</member></destination>
+                <port>8443</port>
+                <protocol>tcp</protocol>
+                <application>custom-internal-api</application>
+                <description>Override for internal custom application on non-standard port - bypasses App-ID inspection</description>
+              </entry>
+            </rules>
+          </application-override>
+
+          <!-- ============================================================ -->
+          <!-- DOS PROTECTION POLICIES                                       -->
+          <!-- ============================================================ -->
+          <dos-protection>
+            <rules>
+              <entry name="protect-web-servers">
+                <from><member>untrust</member></from>
+                <to><member>dmz</member></to>
+                <source><member>any</member></source>
+                <destination><member>all-web-servers</member></destination>
+                <service>svc-http</service>
+                <protection>
+                  <aggregate>
+                    <profile>dos-protection-web</profile>
+                  </aggregate>
+                  <classified>
+                    <profile>dos-protection-per-source</profile>
+                  </classified>
+                </protection>
+                <description>DoS protection for web servers - SYN flood and HTTP flood protection</description>
+              </entry>
+            </rules>
+          </dos-protection>
+
+          <!-- ============================================================ -->
+          <!-- QOS POLICIES                                                  -->
+          <!-- ============================================================ -->
+          <qos>
+            <profile>
+              <entry name="voip-priority">
+                <class>
+                  <entry name="class1">
+                    <priority>real-time</priority>
+                    <bandwidth>
+                      <guaranteed-percent>20</guaranteed-percent>
+                      <limit-percent>30</limit-percent>
+                    </bandwidth>
+                  </entry>
+                </class>
+              </entry>
+            </profile>
+          </qos>
+
+        </entry>
+      </vsys>
+    </entry>
+  </devices>
+
+  <!-- ============================================================ -->
+  <!-- THREAT INTELLIGENCE FEEDS                                    -->
+  <!-- ============================================================ -->
+  <threat-intelligence>
+    <external-dynamic-lists>
+      <entry name="palo-alto-threat-feed">
+        <type>ip</type>
+        <url>https://autofocus.paloaltonetworks.com/feed</url>
+        <recurring>
+          <five-minute/>
+        </recurring>
+        <description>Palo Alto AutoFocus threat intelligence feed</description>
+      </entry>
+      <entry name="cert-in-ioc-feed">
+        <type>ip</type>
+        <url>https://www.cert-in.org.in/iocfeed</url>
+        <recurring>
+          <hourly/>
+        </recurring>
+        <description>CERT-In Indian Computer Emergency Response Team IOC feed</description>
+      </entry>
+    </external-dynamic-lists>
+  </threat-intelligence>
+
+  <!-- ============================================================ -->
+  <!-- LOGGING AND MONITORING                                       -->
+  <!-- ============================================================ -->
+  <log-settings>
+    <syslog>
+      <entry name="splunk-siem">
+        <server>
+          <entry name="splunk-hec">
+            <server>10.0.0.200</server>
+            <transport>SSL</transport>
+            <port>6514</port>
+            <format>IETF</format>
+            <facility>LOG_USER</facility>
+          </entry>
+        </server>
+      </entry>
+    </syslog>
+    <profiles>
+      <entry name="default">
+        <match-list>
+          <entry name="log-all-traffic">
+            <log-type>traffic</log-type>
+            <filter>All Logs</filter>
+            <send-syslog><member>splunk-siem</member></send-syslog>
+          </entry>
+          <entry name="log-all-threats">
+            <log-type>threat</log-type>
+            <filter>All Logs</filter>
+            <send-syslog><member>splunk-siem</member></send-syslog>
+          </entry>
+        </match-list>
+      </entry>
+    </profiles>
+  </log-settings>
+
+  <!-- ============================================================ -->
+  <!-- COMPLIANCE AND AUDIT METADATA                               -->
+  <!-- ============================================================ -->
+  <compliance>
+    <frameworks>
+      <pci-dss>
+        <version>4.0</version>
+        <merchant-level>2</merchant-level>
+        <last-assessment>2025-12-01</last-assessment>
+        <next-assessment>2026-12-01</next-assessment>
+        <qsa>SecurityAudit India Pvt Ltd</qsa>
+      </pci-dss>
+      <iso-27001>
+        <certification-body>BSI India</certification-body>
+        <last-audit>2025-09-01</last-audit>
+        <expiry>2026-09-01</expiry>
+      </iso-27001>
+      <nist-csf>
+        <version>2.0</version>
+        <maturity-level>3</maturity-level>
+      </nist-csf>
+    </frameworks>
+    <open-ports>
+      <port>80</port>
+      <port>443</port>
+      <port>22</port>
+      <port>3389</port>
+      <port>3306</port>
+      <port>27017</port>
+      <port>6379</port>
+      <port>9200</port>
+      <port>2375</port>
+      <port>6443</port>
+      <port>502</port>
+      <port>23</port>
+      <port>21</port>
+      <port>445</port>
+      <port>161</port>
+      <port>4444</port>
+      <port>50050</port>
+    </open-ports>
+  </compliance>
+
+  <interactionRiskModel>
+    <description>Evaluates risk between two IPs based on allowed firewall rules</description>
+
+    <riskWeights>
+        <port number="22" service="SSH" risk="3"/>
+        <port number="80" service="HTTP" risk="2"/>
+        <port number="443" service="HTTPS" risk="2"/>
+        <port number="3306" service="MySQL" risk="8"/>
+        <port number="3389" service="RDP" risk="7"/>
+    </riskWeights>
+
+    <rules>
+        <rule>
+            <condition>public_access</condition>
+            <riskBoost>5</riskBoost>
+        </rule>
+        <rule>
+            <condition>internal_only</condition>
+            <riskBoost>1</riskBoost>
+        </rule>
+    </rules>
+</interactionRiskModel>
+</config>

@@ -1,0 +1,1734 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config version="10.2.0" urldb="paloaltonetworks">
+  <mgt-config>
+    <users>
+      <entry name="admin">
+        <phash>$5$rounds=65536$abc123...</phash>
+        <permissions><role-based><superuser>yes</superuser></role-based></permissions>
+      </entry>
+    </users>
+  </mgt-config>
+
+  <shared>
+    <log-settings>
+      <syslog>
+        <entry name="syslog-server-primary">
+          <server>
+            <entry name="mgmt-syslog">
+              <server>192.168.100.50</server>
+              <transport>UDP</transport>
+              <port>514</port>
+              <format>BSD</format>
+            </entry>
+          </server>
+        </entry>
+      </syslog>
+    </log-settings>
+  </shared>
+
+  <devices>
+    <entry name="localhost.localdomain">
+      <deviceconfig>
+        <system>
+          <hostname>FORTRESS-PA-5260-PRIMARY</hostname>
+          <ip-address>192.168.100.1</ip-address>
+          <netmask>255.255.255.0</netmask>
+          <default-gateway>192.168.100.254</default-gateway>
+          <dns-setting>
+            <servers>
+              <primary>10.10.10.53</primary>
+              <secondary>10.10.10.54</secondary>
+            </servers>
+          </dns-setting>
+          <timezone>America/New_York</timezone>
+          <domain>fortress-enterprise.local</domain>
+          <ntp-servers>
+            <primary-ntp-server>
+              <ntp-server-address>10.60.0.10</ntp-server-address>
+            </primary-ntp-server>
+          </ntp-servers>
+        </system>
+      </deviceconfig>
+
+      <network>
+        <interface>
+          <ethernet>
+            <entry name="ethernet1/1">
+              <layer3>
+                <ip><entry name="203.0.113.1/24"/></ip>
+              </layer3>
+              <comment>Untrust - Internet facing</comment>
+            </entry>
+            <entry name="ethernet1/2">
+              <layer3>
+                <ip><entry name="198.51.100.1/24"/></ip>
+              </layer3>
+              <comment>Internet Edge - Secondary ISP</comment>
+            </entry>
+            <entry name="ethernet1/3">
+              <layer3>
+                <ip><entry name="172.16.10.1/24"/></ip>
+              </layer3>
+              <comment>DMZ - Public services</comment>
+            </entry>
+            <entry name="ethernet1/4">
+              <layer3>
+                <ip><entry name="10.10.10.1/24"/></ip>
+              </layer3>
+              <comment>Trust - Internal corporate</comment>
+            </entry>
+            <entry name="ethernet1/5">
+              <layer3>
+                <ip><entry name="10.20.0.1/24"/></ip>
+              </layer3>
+              <comment>Application Servers</comment>
+            </entry>
+            <entry name="ethernet1/6">
+              <layer3>
+                <ip><entry name="10.30.0.1/24"/></ip>
+              </layer3>
+              <comment>Database Servers</comment>
+            </entry>
+            <entry name="ethernet1/7">
+              <layer3>
+                <ip><entry name="192.168.100.1/24"/></ip>
+              </layer3>
+              <comment>Management Network</comment>
+            </entry>
+            <entry name="ethernet1/8">
+              <layer3>
+                <ip><entry name="10.50.0.1/24"/></ip>
+              </layer3>
+              <comment>VPN Concentrator</comment>
+            </entry>
+            <entry name="ethernet1/9">
+              <layer3>
+                <ip><entry name="10.40.0.1/24"/></ip>
+              </layer3>
+              <comment>Branch Network</comment>
+            </entry>
+            <entry name="ethernet1/10">
+              <layer3>
+                <ip><entry name="10.60.0.1/24"/></ip>
+              </layer3>
+              <comment>Core Infrastructure</comment>
+            </entry>
+            <entry name="ethernet1/11">
+              <layer3>
+                <ip><entry name="10.70.0.1/24"/></ip>
+              </layer3>
+              <comment>IoT Devices</comment>
+            </entry>
+            <entry name="ethernet1/12">
+              <layer3>
+                <ip><entry name="10.80.0.1/24"/></ip>
+              </layer3>
+              <comment>Guest WiFi</comment>
+            </entry>
+            <entry name="ethernet1/13">
+              <layer3>
+                <ip><entry name="10.90.0.1/24"/></ip>
+              </layer3>
+              <comment>Payment Systems - PCI Zone</comment>
+            </entry>
+            <entry name="ethernet1/14">
+              <layer3>
+                <ip><entry name="10.100.0.1/24"/></ip>
+              </layer3>
+              <comment>SCADA / ICS Network</comment>
+            </entry>
+            <entry name="ethernet1/15">
+              <layer3>
+                <ip><entry name="10.110.0.1/24"/></ip>
+              </layer3>
+              <comment>DR Site Replication</comment>
+            </entry>
+          </ethernet>
+        </interface>
+      </network>
+
+      <vsys>
+        <entry name="vsys1">
+          <zone>
+            <!-- Zone 1: untrust -->
+            <entry name="untrust">
+              <network>
+                <layer3>
+                  <member>ethernet1/1</member>
+                </layer3>
+              </network>
+              <is-entry-point>yes</is-entry-point>
+              <trust-level>0</trust-level>
+              <description>Untrusted Internet-facing zone - primary ISP uplink</description>
+            </entry>
+
+            <!-- Zone 2: internet_edge -->
+            <entry name="internet_edge">
+              <network>
+                <layer3>
+                  <member>ethernet1/2</member>
+                </layer3>
+              </network>
+              <is-entry-point>yes</is-entry-point>
+              <trust-level>5</trust-level>
+              <description>Internet edge - secondary ISP and outbound NAT</description>
+            </entry>
+
+            <!-- Zone 3: dmz -->
+            <entry name="dmz">
+              <network>
+                <layer3>
+                  <member>ethernet1/3</member>
+                </layer3>
+              </network>
+              <is-entry-point>no</is-entry-point>
+              <trust-level>25</trust-level>
+              <description>Demilitarized zone for public-facing web and mail servers</description>
+            </entry>
+
+            <!-- Zone 4: trust -->
+            <entry name="trust">
+              <network>
+                <layer3>
+                  <member>ethernet1/4</member>
+                </layer3>
+              </network>
+              <is-entry-point>no</is-entry-point>
+              <trust-level>80</trust-level>
+              <description>Trusted internal corporate LAN for end-user workstations</description>
+            </entry>
+
+            <!-- Zone 5: app_servers -->
+            <entry name="app_servers">
+              <network>
+                <layer3>
+                  <member>ethernet1/5</member>
+                </layer3>
+              </network>
+              <is-entry-point>no</is-entry-point>
+              <trust-level>70</trust-level>
+              <description>Application server tier hosting business applications</description>
+            </entry>
+
+            <!-- Zone 6: database_servers -->
+            <entry name="database_servers">
+              <network>
+                <layer3>
+                  <member>ethernet1/6</member>
+                </layer3>
+              </network>
+              <is-entry-point>no</is-entry-point>
+              <trust-level>90</trust-level>
+              <description>Database tier with MySQL, PostgreSQL, and MSSQL instances</description>
+            </entry>
+
+            <!-- Zone 7: management -->
+            <entry name="management">
+              <network>
+                <layer3>
+                  <member>ethernet1/7</member>
+                </layer3>
+              </network>
+              <is-entry-point>no</is-entry-point>
+              <trust-level>95</trust-level>
+              <description>Network management and monitoring infrastructure</description>
+            </entry>
+
+            <!-- Zone 8: vpn -->
+            <entry name="vpn">
+              <network>
+                <layer3>
+                  <member>ethernet1/8</member>
+                </layer3>
+              </network>
+              <is-entry-point>no</is-entry-point>
+              <trust-level>50</trust-level>
+              <description>VPN termination zone for remote access and site-to-site tunnels</description>
+            </entry>
+
+            <!-- Zone 9: branch_network -->
+            <entry name="branch_network">
+              <network>
+                <layer3>
+                  <member>ethernet1/9</member>
+                </layer3>
+              </network>
+              <is-entry-point>no</is-entry-point>
+              <trust-level>60</trust-level>
+              <description>Branch office connectivity via MPLS and SD-WAN</description>
+            </entry>
+
+            <!-- Zone 10: core -->
+            <entry name="core">
+              <network>
+                <layer3>
+                  <member>ethernet1/10</member>
+                </layer3>
+              </network>
+              <is-entry-point>no</is-entry-point>
+              <trust-level>85</trust-level>
+              <description>Core infrastructure - DNS, NTP, AD domain controllers</description>
+            </entry>
+
+            <!-- Zone 11: iot_devices -->
+            <entry name="iot_devices">
+              <network>
+                <layer3>
+                  <member>ethernet1/11</member>
+                </layer3>
+              </network>
+              <is-entry-point>no</is-entry-point>
+              <trust-level>15</trust-level>
+              <description>IoT and smart building devices - cameras, sensors, HVAC</description>
+            </entry>
+
+            <!-- Zone 12: guest_wifi -->
+            <entry name="guest_wifi">
+              <network>
+                <layer3>
+                  <member>ethernet1/12</member>
+                </layer3>
+              </network>
+              <is-entry-point>no</is-entry-point>
+              <trust-level>5</trust-level>
+              <description>Guest wireless network - isolated captive portal access</description>
+            </entry>
+
+            <!-- Zone 13: payment_systems -->
+            <entry name="payment_systems">
+              <network>
+                <layer3>
+                  <member>ethernet1/13</member>
+                </layer3>
+              </network>
+              <is-entry-point>no</is-entry-point>
+              <trust-level>95</trust-level>
+              <description>PCI DSS compliant payment processing environment</description>
+            </entry>
+
+            <!-- Zone 14: scada_network -->
+            <entry name="scada_network">
+              <network>
+                <layer3>
+                  <member>ethernet1/14</member>
+                </layer3>
+              </network>
+              <is-entry-point>no</is-entry-point>
+              <trust-level>90</trust-level>
+              <description>SCADA/ICS operational technology network - Modbus/DNP3</description>
+            </entry>
+
+            <!-- Zone 15: dr_site -->
+            <entry name="dr_site">
+              <network>
+                <layer3>
+                  <member>ethernet1/15</member>
+                </layer3>
+              </network>
+              <is-entry-point>no</is-entry-point>
+              <trust-level>80</trust-level>
+              <description>Disaster recovery site for async replication and failover</description>
+            </entry>
+          </zone>
+
+          <rulebase>
+            <security>
+              <rules>
+
+                <!-- ============================================================ -->
+                <!-- SECTION 1: Inbound Internet Traffic to DMZ                   -->
+                <!-- ============================================================ -->
+
+                <entry name="allow-inbound-http-to-dmz">
+                  <from><member>untrust</member></from>
+                  <to><member>dmz</member></to>
+                  <source><member>any</member></source>
+                  <destination><member>172.16.10.10</member><member>172.16.10.11</member></destination>
+                  <service><member>service-http</member></service>
+                  <application><member>web-browsing</member></application>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>Allow inbound HTTP to DMZ web servers</description>
+                  <tag><member>inbound</member><member>web</member></tag>
+                </entry>
+
+                <entry name="allow-inbound-https-to-dmz">
+                  <from><member>untrust</member></from>
+                  <to><member>dmz</member></to>
+                  <source><member>any</member></source>
+                  <destination><member>172.16.10.10</member><member>172.16.10.11</member></destination>
+                  <service><member>service-https</member></service>
+                  <application><member>ssl</member></application>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>Allow inbound HTTPS to DMZ web servers</description>
+                  <tag><member>inbound</member><member>web</member><member>encrypted</member></tag>
+                </entry>
+
+                <entry name="allow-inbound-https-internet-edge-to-dmz">
+                  <from><member>internet_edge</member></from>
+                  <to><member>dmz</member></to>
+                  <source><member>any</member></source>
+                  <destination><member>172.16.10.10</member><member>172.16.10.11</member></destination>
+                  <service><member>service-https</member></service>
+                  <application><member>ssl</member></application>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>Allow inbound HTTPS from secondary ISP to DMZ</description>
+                </entry>
+
+                <!-- ============================================================ -->
+                <!-- SECTION 2: DNS Traffic                                       -->
+                <!-- ============================================================ -->
+
+                <entry name="allow-dns-trust-to-dmz">
+                  <from><member>trust</member></from>
+                  <to><member>dmz</member></to>
+                  <source><member>10.10.10.0/24</member></source>
+                  <destination><member>172.16.10.53</member></destination>
+                  <service><member>service-dns-udp</member></service>
+                  <application><member>dns</member></application>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>Allow DNS queries from trust to DMZ DNS resolvers</description>
+                </entry>
+
+                <entry name="allow-dns-trust-to-core">
+                  <from><member>trust</member></from>
+                  <to><member>core</member></to>
+                  <source><member>10.10.10.0/24</member></source>
+                  <destination><member>10.60.0.53</member></destination>
+                  <service><member>service-dns-udp</member></service>
+                  <application><member>dns</member></application>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>Allow DNS queries from trust to core internal DNS</description>
+                </entry>
+
+                <entry name="allow-dns-all-internal-to-core">
+                  <from><member>app_servers</member><member>database_servers</member><member>branch_network</member><member>vpn</member></from>
+                  <to><member>core</member></to>
+                  <source><member>any</member></source>
+                  <destination><member>10.60.0.53</member></destination>
+                  <service><member>service-dns-udp</member></service>
+                  <application><member>dns</member></application>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>Allow DNS from internal zones to core DNS servers</description>
+                </entry>
+
+                <!-- ============================================================ -->
+                <!-- SECTION 3: Management Access (SSH/SNMP)                      -->
+                <!-- ============================================================ -->
+
+                <entry name="allow-ssh-mgmt-to-trust">
+                  <from><member>management</member></from>
+                  <to><member>trust</member></to>
+                  <source><member>192.168.100.0/24</member></source>
+                  <destination><member>any</member></destination>
+                  <service><member>service-ssh</member></service>
+                  <application><member>ssh</member></application>
+                  <action>allow</action>
+                  <log-start>yes</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>Allow SSH from management to trust zone</description>
+                </entry>
+
+                <entry name="allow-ssh-mgmt-to-app-servers">
+                  <from><member>management</member></from>
+                  <to><member>app_servers</member></to>
+                  <source><member>192.168.100.0/24</member></source>
+                  <destination><member>any</member></destination>
+                  <service><member>service-ssh</member></service>
+                  <application><member>ssh</member></application>
+                  <action>allow</action>
+                  <log-start>yes</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>Allow SSH from management to application servers</description>
+                </entry>
+
+                <entry name="allow-ssh-mgmt-to-db-servers">
+                  <from><member>management</member></from>
+                  <to><member>database_servers</member></to>
+                  <source><member>192.168.100.0/24</member></source>
+                  <destination><member>any</member></destination>
+                  <service><member>service-ssh</member></service>
+                  <application><member>ssh</member></application>
+                  <action>allow</action>
+                  <log-start>yes</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>Allow SSH from management to database servers</description>
+                </entry>
+
+                <entry name="allow-ssh-mgmt-to-core">
+                  <from><member>management</member></from>
+                  <to><member>core</member></to>
+                  <source><member>192.168.100.0/24</member></source>
+                  <destination><member>any</member></destination>
+                  <service><member>service-ssh</member></service>
+                  <application><member>ssh</member></application>
+                  <action>allow</action>
+                  <log-start>yes</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>Allow SSH from management to core infrastructure</description>
+                </entry>
+
+                <entry name="allow-ssh-mgmt-to-dmz">
+                  <from><member>management</member></from>
+                  <to><member>dmz</member></to>
+                  <source><member>192.168.100.0/24</member></source>
+                  <destination><member>any</member></destination>
+                  <service><member>service-ssh</member></service>
+                  <application><member>ssh</member></application>
+                  <action>allow</action>
+                  <log-start>yes</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>Allow SSH from management to DMZ servers</description>
+                </entry>
+
+                <entry name="allow-ssh-mgmt-to-branch">
+                  <from><member>management</member></from>
+                  <to><member>branch_network</member></to>
+                  <source><member>192.168.100.0/24</member></source>
+                  <destination><member>any</member></destination>
+                  <service><member>service-ssh</member></service>
+                  <application><member>ssh</member></application>
+                  <action>allow</action>
+                  <log-start>yes</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>Allow SSH from management to branch network devices</description>
+                </entry>
+
+                <entry name="allow-ssh-mgmt-to-iot">
+                  <from><member>management</member></from>
+                  <to><member>iot_devices</member></to>
+                  <source><member>192.168.100.0/24</member></source>
+                  <destination><member>any</member></destination>
+                  <service><member>service-ssh</member></service>
+                  <application><member>ssh</member></application>
+                  <action>allow</action>
+                  <log-start>yes</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>Allow SSH from management to IoT devices</description>
+                </entry>
+
+                <entry name="allow-ssh-mgmt-to-scada">
+                  <from><member>management</member></from>
+                  <to><member>scada_network</member></to>
+                  <source><member>192.168.100.0/24</member></source>
+                  <destination><member>any</member></destination>
+                  <service><member>service-ssh</member></service>
+                  <application><member>ssh</member></application>
+                  <action>allow</action>
+                  <log-start>yes</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>Allow SSH from management to SCADA network</description>
+                </entry>
+
+                <entry name="allow-snmp-mgmt-to-all">
+                  <from><member>management</member></from>
+                  <to><member>trust</member><member>app_servers</member><member>database_servers</member><member>core</member><member>dmz</member><member>branch_network</member><member>iot_devices</member><member>scada_network</member><member>vpn</member><member>dr_site</member></to>
+                  <source><member>192.168.100.50</member></source>
+                  <destination><member>any</member></destination>
+                  <service><member>service-snmp</member></service>
+                  <application><member>snmp</member></application>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>Allow SNMP polling from management monitoring server to all zones</description>
+                </entry>
+
+                <!-- ============================================================ -->
+                <!-- SECTION 4: RISKY Rules - RDP, SMB, FTP, Telnet              -->
+                <!-- ============================================================ -->
+
+                <!-- RISKY: RDP from trust to app_servers -->
+                <entry name="allow-rdp-trust-to-app-servers">
+                  <from><member>trust</member></from>
+                  <to><member>app_servers</member></to>
+                  <source><member>10.10.10.0/24</member></source>
+                  <destination><member>10.20.0.0/24</member></destination>
+                  <service><member>service-rdp</member></service>
+                  <application><member>ms-rdp</member></application>
+                  <action>allow</action>
+                  <log-start>yes</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>RISKY: Allow RDP from trust workstations to app servers - lateral movement risk</description>
+                </entry>
+
+                <!-- RISKY: SMB from trust to database_servers -->
+                <entry name="allow-smb-trust-to-db">
+                  <from><member>trust</member></from>
+                  <to><member>database_servers</member></to>
+                  <source><member>10.10.10.0/24</member></source>
+                  <destination><member>10.30.0.0/24</member></destination>
+                  <service><member>service-smb</member></service>
+                  <application><member>ms-ds-smbv2</member></application>
+                  <action>allow</action>
+                  <log-start>yes</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>RISKY: SMB file sharing to database servers - ransomware propagation vector</description>
+                </entry>
+
+                <!-- VERY RISKY: FTP from DMZ to app_servers (cleartext, inbound from DMZ) -->
+                <entry name="allow-ftp-dmz-to-app-servers">
+                  <from><member>dmz</member></from>
+                  <to><member>app_servers</member></to>
+                  <source><member>172.16.10.0/24</member></source>
+                  <destination><member>10.20.0.0/24</member></destination>
+                  <service><member>service-ftp</member></service>
+                  <application><member>ftp</member></application>
+                  <action>allow</action>
+                  <log-start>yes</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>VERY RISKY: FTP from DMZ to internal app servers - cleartext credentials, DMZ pivot</description>
+                </entry>
+
+                <!-- VERY RISKY: Telnet from branch to core -->
+                <entry name="allow-telnet-branch-to-core">
+                  <from><member>branch_network</member></from>
+                  <to><member>core</member></to>
+                  <source><member>10.40.0.0/24</member></source>
+                  <destination><member>10.60.0.0/24</member></destination>
+                  <service><member>service-telnet</member></service>
+                  <application><member>telnet</member></application>
+                  <action>allow</action>
+                  <log-start>yes</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>VERY RISKY: Telnet from branch to core - cleartext management protocol</description>
+                </entry>
+
+                <!-- RISKY: SCADA Modbus from scada_network to core -->
+                <entry name="allow-modbus-scada-to-core">
+                  <from><member>scada_network</member></from>
+                  <to><member>core</member></to>
+                  <source><member>10.100.0.0/24</member></source>
+                  <destination><member>10.60.0.0/24</member></destination>
+                  <service><member>service-modbus</member></service>
+                  <application><member>modbus-tcp</member></application>
+                  <action>allow</action>
+                  <log-start>yes</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>RISKY: SCADA Modbus protocol to core - no authentication, ICS risk</description>
+                </entry>
+
+                <!-- ============================================================ -->
+                <!-- SECTION 5: Database Access from App Tier                     -->
+                <!-- ============================================================ -->
+
+                <entry name="allow-mysql-app-to-db">
+                  <from><member>app_servers</member></from>
+                  <to><member>database_servers</member></to>
+                  <source><member>10.20.0.0/24</member></source>
+                  <destination><member>10.30.0.10</member><member>10.30.0.11</member></destination>
+                  <service><member>service-mysql</member></service>
+                  <application><member>mysql</member></application>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>Allow MySQL connections from app tier to database cluster</description>
+                </entry>
+
+                <entry name="allow-postgresql-app-to-db">
+                  <from><member>app_servers</member></from>
+                  <to><member>database_servers</member></to>
+                  <source><member>10.20.0.0/24</member></source>
+                  <destination><member>10.30.0.20</member><member>10.30.0.21</member></destination>
+                  <service><member>service-postgresql</member></service>
+                  <application><member>postgres</member></application>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>Allow PostgreSQL connections from app tier to database cluster</description>
+                </entry>
+
+                <entry name="allow-mssql-app-to-db">
+                  <from><member>app_servers</member></from>
+                  <to><member>database_servers</member></to>
+                  <source><member>10.20.0.0/24</member></source>
+                  <destination><member>10.30.0.30</member></destination>
+                  <service><member>service-mssql</member></service>
+                  <application><member>mssql-db</member></application>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>Allow MSSQL connections from app tier to SQL Server</description>
+                </entry>
+
+                <!-- ============================================================ -->
+                <!-- SECTION 6: Outbound Internet from Trust                      -->
+                <!-- ============================================================ -->
+
+                <entry name="allow-https-trust-to-internet">
+                  <from><member>trust</member></from>
+                  <to><member>internet_edge</member></to>
+                  <source><member>10.10.10.0/24</member></source>
+                  <destination><member>any</member></destination>
+                  <service><member>service-https</member></service>
+                  <application><member>ssl</member><member>web-browsing</member></application>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>Allow outbound HTTPS from trust to internet edge</description>
+                </entry>
+
+                <entry name="allow-http-trust-to-internet">
+                  <from><member>trust</member></from>
+                  <to><member>internet_edge</member></to>
+                  <source><member>10.10.10.0/24</member></source>
+                  <destination><member>any</member></destination>
+                  <service><member>service-http</member></service>
+                  <application><member>web-browsing</member></application>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>Allow outbound HTTP from trust to internet edge</description>
+                </entry>
+
+                <!-- ============================================================ -->
+                <!-- SECTION 7: Email / SMTP                                      -->
+                <!-- ============================================================ -->
+
+                <entry name="allow-smtp-dmz-to-untrust">
+                  <from><member>dmz</member></from>
+                  <to><member>untrust</member></to>
+                  <source><member>172.16.10.25</member></source>
+                  <destination><member>any</member></destination>
+                  <service><member>service-smtp</member></service>
+                  <application><member>smtp</member></application>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>Allow outbound SMTP from DMZ mail relay to internet</description>
+                </entry>
+
+                <entry name="allow-smtp-inbound-to-dmz">
+                  <from><member>untrust</member></from>
+                  <to><member>dmz</member></to>
+                  <source><member>any</member></source>
+                  <destination><member>172.16.10.25</member></destination>
+                  <service><member>service-smtp</member></service>
+                  <application><member>smtp</member></application>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>Allow inbound SMTP to DMZ mail gateway</description>
+                </entry>
+
+                <!-- ============================================================ -->
+                <!-- SECTION 8: VPN                                               -->
+                <!-- ============================================================ -->
+
+                <entry name="allow-ipsec-untrust-to-vpn">
+                  <from><member>untrust</member></from>
+                  <to><member>vpn</member></to>
+                  <source><member>any</member></source>
+                  <destination><member>10.50.0.1</member></destination>
+                  <service><member>service-ipsec</member></service>
+                  <application><member>ike</member><member>ipsec</member></application>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>Allow IPSec VPN IKE (500/4500) from internet to VPN concentrator</description>
+                </entry>
+
+                <entry name="allow-vpn-to-trust">
+                  <from><member>vpn</member></from>
+                  <to><member>trust</member></to>
+                  <source><member>10.50.0.0/24</member></source>
+                  <destination><member>10.10.10.0/24</member></destination>
+                  <service><member>any</member></service>
+                  <application><member>any</member></application>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>Allow VPN users access to trust zone - overly permissive service any</description>
+                </entry>
+
+                <entry name="allow-vpn-to-app-servers">
+                  <from><member>vpn</member></from>
+                  <to><member>app_servers</member></to>
+                  <source><member>10.50.0.0/24</member></source>
+                  <destination><member>10.20.0.0/24</member></destination>
+                  <service><member>service-https</member><member>service-ssh</member></service>
+                  <application><member>ssl</member><member>ssh</member></application>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>Allow VPN users HTTPS and SSH to app servers</description>
+                </entry>
+
+                <!-- ============================================================ -->
+                <!-- SECTION 9: NTP                                               -->
+                <!-- ============================================================ -->
+
+                <entry name="allow-ntp-core-to-untrust">
+                  <from><member>core</member></from>
+                  <to><member>untrust</member></to>
+                  <source><member>10.60.0.10</member></source>
+                  <destination><member>any</member></destination>
+                  <service><member>service-ntp</member></service>
+                  <application><member>ntp</member></application>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>Allow NTP sync from core time server to external NTP pools</description>
+                </entry>
+
+                <entry name="allow-ntp-internal-to-core">
+                  <from><member>trust</member><member>app_servers</member><member>database_servers</member><member>dmz</member><member>management</member></from>
+                  <to><member>core</member></to>
+                  <source><member>any</member></source>
+                  <destination><member>10.60.0.10</member></destination>
+                  <service><member>service-ntp</member></service>
+                  <application><member>ntp</member></application>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>Allow internal zones to sync time with core NTP server</description>
+                </entry>
+
+                <!-- ============================================================ -->
+                <!-- SECTION 10: LDAP / Active Directory                          -->
+                <!-- ============================================================ -->
+
+                <entry name="allow-ldap-trust-to-mgmt">
+                  <from><member>trust</member></from>
+                  <to><member>management</member></to>
+                  <source><member>10.10.10.0/24</member></source>
+                  <destination><member>192.168.100.10</member><member>192.168.100.11</member></destination>
+                  <service><member>service-ldap</member></service>
+                  <application><member>ldap</member></application>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>Allow LDAP authentication from trust to management AD controllers</description>
+                </entry>
+
+                <entry name="allow-ldaps-trust-to-mgmt">
+                  <from><member>trust</member></from>
+                  <to><member>management</member></to>
+                  <source><member>10.10.10.0/24</member></source>
+                  <destination><member>192.168.100.10</member><member>192.168.100.11</member></destination>
+                  <service><member>service-ldaps</member></service>
+                  <application><member>ldap</member></application>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>Allow LDAPS (secure) from trust to management AD controllers</description>
+                </entry>
+
+                <!-- ============================================================ -->
+                <!-- SECTION 11: Syslog from All Zones to Management              -->
+                <!-- ============================================================ -->
+
+                <entry name="allow-syslog-all-to-mgmt">
+                  <from><member>trust</member><member>dmz</member><member>app_servers</member><member>database_servers</member><member>core</member><member>branch_network</member><member>vpn</member><member>iot_devices</member><member>scada_network</member><member>payment_systems</member><member>dr_site</member><member>guest_wifi</member></from>
+                  <to><member>management</member></to>
+                  <source><member>any</member></source>
+                  <destination><member>192.168.100.50</member></destination>
+                  <service><member>service-syslog</member></service>
+                  <application><member>syslog</member></application>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>no</log-end>
+                  <disabled>no</disabled>
+                  <description>Allow syslog from all internal zones to management SIEM collector</description>
+                </entry>
+
+                <!-- ============================================================ -->
+                <!-- SECTION 12: RADIUS for VPN Authentication                    -->
+                <!-- ============================================================ -->
+
+                <entry name="allow-radius-vpn-to-mgmt">
+                  <from><member>vpn</member></from>
+                  <to><member>management</member></to>
+                  <source><member>10.50.0.1</member></source>
+                  <destination><member>192.168.100.20</member></destination>
+                  <service><member>service-radius</member></service>
+                  <application><member>radius</member></application>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>Allow RADIUS auth from VPN concentrator to management RADIUS server</description>
+                </entry>
+
+                <!-- ============================================================ -->
+                <!-- SECTION 13: IoT MQTT                                         -->
+                <!-- ============================================================ -->
+
+                <entry name="allow-mqtt-iot-to-app">
+                  <from><member>iot_devices</member></from>
+                  <to><member>app_servers</member></to>
+                  <source><member>10.70.0.0/24</member></source>
+                  <destination><member>10.20.0.50</member></destination>
+                  <service><member>service-mqtt</member></service>
+                  <application><member>mqtt</member></application>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>Allow MQTT telemetry from IoT devices to app server broker</description>
+                </entry>
+
+                <!-- ============================================================ -->
+                <!-- SECTION 14: Payment / PCI Zone                               -->
+                <!-- ============================================================ -->
+
+                <entry name="allow-pci-https-payment-to-untrust">
+                  <from><member>payment_systems</member></from>
+                  <to><member>untrust</member></to>
+                  <source><member>10.90.0.0/24</member></source>
+                  <destination><member>any</member></destination>
+                  <service><member>service-https</member></service>
+                  <application><member>ssl</member></application>
+                  <action>allow</action>
+                  <log-start>yes</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>Allow PCI payment processing over HTTPS to payment gateways</description>
+                </entry>
+
+                <entry name="allow-pci-app-to-payment-db">
+                  <from><member>payment_systems</member></from>
+                  <to><member>database_servers</member></to>
+                  <source><member>10.90.0.10</member></source>
+                  <destination><member>10.30.0.40</member></destination>
+                  <service><member>service-postgresql</member></service>
+                  <application><member>postgres</member></application>
+                  <action>allow</action>
+                  <log-start>yes</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>PCI app server to dedicated payment database</description>
+                </entry>
+
+                <!-- ============================================================ -->
+                <!-- SECTION 15: Guest WiFi                                       -->
+                <!-- ============================================================ -->
+
+                <entry name="allow-guest-http-to-untrust">
+                  <from><member>guest_wifi</member></from>
+                  <to><member>untrust</member></to>
+                  <source><member>10.80.0.0/24</member></source>
+                  <destination><member>any</member></destination>
+                  <service><member>service-http</member></service>
+                  <application><member>web-browsing</member></application>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>Allow guest WiFi HTTP to internet</description>
+                </entry>
+
+                <entry name="allow-guest-https-to-untrust">
+                  <from><member>guest_wifi</member></from>
+                  <to><member>untrust</member></to>
+                  <source><member>10.80.0.0/24</member></source>
+                  <destination><member>any</member></destination>
+                  <service><member>service-https</member></service>
+                  <application><member>ssl</member></application>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>Allow guest WiFi HTTPS to internet</description>
+                </entry>
+
+                <!-- ============================================================ -->
+                <!-- SECTION 16: DR Site Replication                              -->
+                <!-- ============================================================ -->
+
+                <entry name="allow-dr-replication-core-to-dr">
+                  <from><member>core</member></from>
+                  <to><member>dr_site</member></to>
+                  <source><member>10.60.0.0/24</member></source>
+                  <destination><member>10.110.0.0/24</member></destination>
+                  <service><member>service-dr-replication</member></service>
+                  <application><member>ssl</member></application>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>Allow DR replication traffic (8443) from core to DR site</description>
+                </entry>
+
+                <entry name="allow-dr-replication-db-to-dr">
+                  <from><member>database_servers</member></from>
+                  <to><member>dr_site</member></to>
+                  <source><member>10.30.0.0/24</member></source>
+                  <destination><member>10.110.0.0/24</member></destination>
+                  <service><member>service-dr-replication</member></service>
+                  <application><member>ssl</member></application>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>Allow database replication to DR site</description>
+                </entry>
+
+                <!-- ============================================================ -->
+                <!-- SECTION 17: DMZ to Internal App Tier (web app backends)      -->
+                <!-- ============================================================ -->
+
+                <entry name="allow-dmz-to-app-https">
+                  <from><member>dmz</member></from>
+                  <to><member>app_servers</member></to>
+                  <source><member>172.16.10.10</member><member>172.16.10.11</member></source>
+                  <destination><member>10.20.0.10</member><member>10.20.0.11</member></destination>
+                  <service><member>service-https</member></service>
+                  <application><member>ssl</member></application>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>Allow DMZ reverse proxies to reach backend app servers over HTTPS</description>
+                </entry>
+
+                <entry name="allow-dmz-to-app-8080">
+                  <from><member>dmz</member></from>
+                  <to><member>app_servers</member></to>
+                  <source><member>172.16.10.10</member><member>172.16.10.11</member></source>
+                  <destination><member>10.20.0.10</member><member>10.20.0.11</member></destination>
+                  <service><member>service-http-alt</member></service>
+                  <application><member>web-browsing</member></application>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>Allow DMZ to app servers on port 8080 for API traffic</description>
+                </entry>
+
+                <!-- ============================================================ -->
+                <!-- SECTION 18: Branch Network Access                            -->
+                <!-- ============================================================ -->
+
+                <entry name="allow-branch-to-trust-https">
+                  <from><member>branch_network</member></from>
+                  <to><member>trust</member></to>
+                  <source><member>10.40.0.0/24</member></source>
+                  <destination><member>10.10.10.0/24</member></destination>
+                  <service><member>service-https</member></service>
+                  <application><member>ssl</member></application>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>Allow branch offices HTTPS to corporate trust zone</description>
+                </entry>
+
+                <entry name="allow-branch-to-app-https">
+                  <from><member>branch_network</member></from>
+                  <to><member>app_servers</member></to>
+                  <source><member>10.40.0.0/24</member></source>
+                  <destination><member>10.20.0.0/24</member></destination>
+                  <service><member>service-https</member></service>
+                  <application><member>ssl</member></application>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>Allow branch offices HTTPS to application servers</description>
+                </entry>
+
+                <!-- ============================================================ -->
+                <!-- SECTION 19: OVERLY PERMISSIVE RULES (Deliberately Bad)       -->
+                <!-- ============================================================ -->
+
+                <!-- OVERLY PERMISSIVE: Any source, any dest, any service from trust to untrust -->
+                <entry name="allow-trust-any-to-untrust-any">
+                  <from><member>trust</member></from>
+                  <to><member>untrust</member></to>
+                  <source><member>any</member></source>
+                  <destination><member>any</member></destination>
+                  <service><member>any</member></service>
+                  <application><member>any</member></application>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>no</log-end>
+                  <disabled>no</disabled>
+                  <description>OVERLY PERMISSIVE: Trust any to untrust any - no logging, no restrictions</description>
+                </entry>
+
+                <!-- OVERLY PERMISSIVE: DMZ to any internal zone -->
+                <entry name="allow-dmz-to-internal-any">
+                  <from><member>dmz</member></from>
+                  <to><member>trust</member><member>app_servers</member><member>database_servers</member><member>core</member></to>
+                  <source><member>any</member></source>
+                  <destination><member>any</member></destination>
+                  <service><member>any</member></service>
+                  <application><member>any</member></application>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>no</log-end>
+                  <disabled>no</disabled>
+                  <description>OVERLY PERMISSIVE: DMZ to all internal zones - any service, no logging</description>
+                </entry>
+
+                <!-- OVERLY PERMISSIVE: IoT to everything -->
+                <entry name="allow-iot-any-to-any">
+                  <from><member>iot_devices</member></from>
+                  <to><member>any</member></to>
+                  <source><member>any</member></source>
+                  <destination><member>any</member></destination>
+                  <service><member>any</member></service>
+                  <application><member>any</member></application>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>no</log-end>
+                  <disabled>no</disabled>
+                  <description>OVERLY PERMISSIVE: IoT devices unrestricted access - botnet risk</description>
+                </entry>
+
+                <!-- OVERLY PERMISSIVE: Guest WiFi to internal -->
+                <entry name="allow-guest-to-internal-any">
+                  <from><member>guest_wifi</member></from>
+                  <to><member>trust</member><member>app_servers</member><member>management</member></to>
+                  <source><member>any</member></source>
+                  <destination><member>any</member></destination>
+                  <service><member>any</member></service>
+                  <application><member>any</member></application>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>no</log-end>
+                  <disabled>no</disabled>
+                  <description>OVERLY PERMISSIVE: Guest WiFi to internal zones - segmentation bypass</description>
+                </entry>
+
+                <!-- OVERLY PERMISSIVE: Any to any on high ports -->
+                <entry name="allow-any-high-ports">
+                  <from><member>any</member></from>
+                  <to><member>any</member></to>
+                  <source><member>any</member></source>
+                  <destination><member>any</member></destination>
+                  <service><member>service-high-ports</member></service>
+                  <application><member>any</member></application>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>no</log-end>
+                  <disabled>no</disabled>
+                  <description>OVERLY PERMISSIVE: Any to any on high ports 1024-65535 - massive exposure</description>
+                </entry>
+
+                <!-- ============================================================ -->
+                <!-- SECTION 20: INSECURE RULES (Deliberately Dangerous)          -->
+                <!-- ============================================================ -->
+
+                <!-- INSECURE: Telnet from untrust to management -->
+                <entry name="allow-telnet-untrust-to-mgmt">
+                  <from><member>untrust</member></from>
+                  <to><member>management</member></to>
+                  <source><member>any</member></source>
+                  <destination><member>192.168.100.0/24</member></destination>
+                  <service><member>service-telnet</member></service>
+                  <application><member>telnet</member></application>
+                  <action>allow</action>
+                  <log-start>yes</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>INSECURE: Telnet from internet to management - cleartext admin access from untrust</description>
+                </entry>
+
+                <!-- INSECURE: FTP from untrust to database -->
+                <entry name="allow-ftp-untrust-to-db">
+                  <from><member>untrust</member></from>
+                  <to><member>database_servers</member></to>
+                  <source><member>any</member></source>
+                  <destination><member>10.30.0.0/24</member></destination>
+                  <service><member>service-ftp</member></service>
+                  <application><member>ftp</member></application>
+                  <action>allow</action>
+                  <log-start>yes</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>INSECURE: FTP from internet directly to database servers - data exfiltration risk</description>
+                </entry>
+
+                <!-- INSECURE: MySQL directly exposed to untrust -->
+                <entry name="allow-mysql-untrust-to-db">
+                  <from><member>untrust</member></from>
+                  <to><member>database_servers</member></to>
+                  <source><member>any</member></source>
+                  <destination><member>10.30.0.10</member></destination>
+                  <service><member>service-mysql</member></service>
+                  <application><member>mysql</member></application>
+                  <action>allow</action>
+                  <log-start>yes</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>INSECURE: MySQL exposed to internet - SQL injection and direct DB access</description>
+                </entry>
+
+                <!-- INSECURE: RDP from untrust to trust -->
+                <entry name="allow-rdp-untrust-to-trust">
+                  <from><member>untrust</member></from>
+                  <to><member>trust</member></to>
+                  <source><member>any</member></source>
+                  <destination><member>10.10.10.0/24</member></destination>
+                  <service><member>service-rdp</member></service>
+                  <application><member>ms-rdp</member></application>
+                  <action>allow</action>
+                  <log-start>yes</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>INSECURE: RDP from internet to internal workstations - BlueKeep/brute force</description>
+                </entry>
+
+                <!-- INSECURE: SNMP from untrust -->
+                <entry name="allow-snmp-untrust-to-mgmt">
+                  <from><member>untrust</member></from>
+                  <to><member>management</member></to>
+                  <source><member>any</member></source>
+                  <destination><member>192.168.100.0/24</member></destination>
+                  <service><member>service-snmp</member></service>
+                  <application><member>snmp</member></application>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>INSECURE: SNMP from internet to management - network reconnaissance</description>
+                </entry>
+
+                <!-- ============================================================ -->
+                <!-- SECTION 21: SHADOW RULES (Can never be hit)                  -->
+                <!-- ============================================================ -->
+
+                <!-- SHADOW: This rule is shadowed by allow-trust-any-to-untrust-any above -->
+                <entry name="deny-trust-telnet-to-untrust">
+                  <from><member>trust</member></from>
+                  <to><member>untrust</member></to>
+                  <source><member>10.10.10.0/24</member></source>
+                  <destination><member>any</member></destination>
+                  <service><member>service-telnet</member></service>
+                  <application><member>telnet</member></application>
+                  <action>deny</action>
+                  <log-start>yes</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>SHADOW RULE: Block telnet outbound from trust - shadowed by any-any rule above</description>
+                </entry>
+
+                <!-- SHADOW: This rule is shadowed by allow-dmz-to-internal-any above -->
+                <entry name="deny-dmz-to-database-direct">
+                  <from><member>dmz</member></from>
+                  <to><member>database_servers</member></to>
+                  <source><member>172.16.10.0/24</member></source>
+                  <destination><member>10.30.0.0/24</member></destination>
+                  <service><member>any</member></service>
+                  <application><member>any</member></application>
+                  <action>deny</action>
+                  <log-start>yes</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>SHADOW RULE: Block DMZ to DB direct - shadowed by dmz-to-internal-any above</description>
+                </entry>
+
+                <!-- SHADOW: Shadowed by allow-iot-any-to-any above -->
+                <entry name="deny-iot-to-payment">
+                  <from><member>iot_devices</member></from>
+                  <to><member>payment_systems</member></to>
+                  <source><member>10.70.0.0/24</member></source>
+                  <destination><member>10.90.0.0/24</member></destination>
+                  <service><member>any</member></service>
+                  <application><member>any</member></application>
+                  <action>deny</action>
+                  <log-start>yes</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>SHADOW RULE: Block IoT to payment - shadowed by iot-any-to-any above</description>
+                </entry>
+
+                <!-- SHADOW: Shadowed by allow-guest-to-internal-any above -->
+                <entry name="deny-guest-to-management">
+                  <from><member>guest_wifi</member></from>
+                  <to><member>management</member></to>
+                  <source><member>10.80.0.0/24</member></source>
+                  <destination><member>192.168.100.0/24</member></destination>
+                  <service><member>any</member></service>
+                  <application><member>any</member></application>
+                  <action>deny</action>
+                  <log-start>yes</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>SHADOW RULE: Block guest to management - shadowed by guest-to-internal-any above</description>
+                </entry>
+
+                <!-- SHADOW: More specific HTTPS rule shadowed by allow-any-high-ports -->
+                <entry name="allow-specific-https-branch-to-dr">
+                  <from><member>branch_network</member></from>
+                  <to><member>dr_site</member></to>
+                  <source><member>10.40.0.100</member></source>
+                  <destination><member>10.110.0.10</member></destination>
+                  <service><member>service-https</member></service>
+                  <application><member>ssl</member></application>
+                  <action>allow</action>
+                  <log-start>yes</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>SHADOW RULE: Specific HTTPS rule - already covered by any-high-ports rule</description>
+                </entry>
+
+                <!-- ============================================================ -->
+                <!-- SECTION 22: UNUSED RULES (Enabled but effectively dead)      -->
+                <!-- ============================================================ -->
+
+                <entry name="allow-legacy-tftp-branch-to-core">
+                  <from><member>branch_network</member></from>
+                  <to><member>core</member></to>
+                  <source><member>10.40.0.200</member></source>
+                  <destination><member>10.60.0.200</member></destination>
+                  <service><member>service-tftp</member></service>
+                  <application><member>tftp</member></application>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>UNUSED: Legacy TFTP for old config backups - decommissioned server</description>
+                </entry>
+
+                <entry name="allow-legacy-oracle-app-to-db">
+                  <from><member>app_servers</member></from>
+                  <to><member>database_servers</member></to>
+                  <source><member>10.20.0.100</member></source>
+                  <destination><member>10.30.0.100</member></destination>
+                  <service><member>service-oracle</member></service>
+                  <application><member>oracle</member></application>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>UNUSED: Oracle DB access - database migrated to PostgreSQL in 2024</description>
+                </entry>
+
+                <entry name="allow-legacy-rsh-mgmt-to-core">
+                  <from><member>management</member></from>
+                  <to><member>core</member></to>
+                  <source><member>192.168.100.200</member></source>
+                  <destination><member>10.60.0.100</member></destination>
+                  <service><member>service-rsh</member></service>
+                  <application><member>rsh</member></application>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>UNUSED: Legacy RSH for old automation scripts - replaced by Ansible/SSH</description>
+                </entry>
+
+                <entry name="allow-legacy-netbios-trust-to-branch">
+                  <from><member>trust</member></from>
+                  <to><member>branch_network</member></to>
+                  <source><member>10.10.10.0/24</member></source>
+                  <destination><member>10.40.0.0/24</member></destination>
+                  <service><member>service-netbios</member></service>
+                  <application><member>netbios-dg</member></application>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>UNUSED: NetBIOS for old Windows file sharing - migrated to SMBv3</description>
+                </entry>
+
+                <entry name="allow-legacy-imap-dmz-to-trust">
+                  <from><member>dmz</member></from>
+                  <to><member>trust</member></to>
+                  <source><member>172.16.10.25</member></source>
+                  <destination><member>10.10.10.50</member></destination>
+                  <service><member>service-imap</member></service>
+                  <application><member>imap</member></application>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>UNUSED: IMAP from DMZ mail to internal - migrated to O365 cloud</description>
+                </entry>
+
+                <!-- ============================================================ -->
+                <!-- SECTION 23: Additional Legitimate Rules                      -->
+                <!-- ============================================================ -->
+
+                <entry name="allow-icmp-mgmt-to-all">
+                  <from><member>management</member></from>
+                  <to><member>any</member></to>
+                  <source><member>192.168.100.0/24</member></source>
+                  <destination><member>any</member></destination>
+                  <service><member>service-icmp</member></service>
+                  <application><member>ping</member></application>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>no</log-end>
+                  <disabled>no</disabled>
+                  <description>Allow ICMP/ping from management for monitoring and troubleshooting</description>
+                </entry>
+
+                <entry name="allow-https-app-to-internet">
+                  <from><member>app_servers</member></from>
+                  <to><member>internet_edge</member></to>
+                  <source><member>10.20.0.0/24</member></source>
+                  <destination><member>any</member></destination>
+                  <service><member>service-https</member></service>
+                  <application><member>ssl</member></application>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>Allow app servers to reach external APIs over HTTPS</description>
+                </entry>
+
+                <entry name="allow-dns-core-to-untrust">
+                  <from><member>core</member></from>
+                  <to><member>untrust</member></to>
+                  <source><member>10.60.0.53</member></source>
+                  <destination><member>any</member></destination>
+                  <service><member>service-dns-udp</member></service>
+                  <application><member>dns</member></application>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>Allow core DNS resolver to query external DNS</description>
+                </entry>
+
+                <entry name="allow-kerberos-trust-to-core">
+                  <from><member>trust</member></from>
+                  <to><member>core</member></to>
+                  <source><member>10.10.10.0/24</member></source>
+                  <destination><member>10.60.0.10</member><member>10.60.0.11</member></destination>
+                  <service><member>service-kerberos</member></service>
+                  <application><member>kerberos</member></application>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>Allow Kerberos authentication from trust to core domain controllers</description>
+                </entry>
+
+                <entry name="allow-https-payment-to-app">
+                  <from><member>payment_systems</member></from>
+                  <to><member>app_servers</member></to>
+                  <source><member>10.90.0.0/24</member></source>
+                  <destination><member>10.20.0.30</member></destination>
+                  <service><member>service-https</member></service>
+                  <application><member>ssl</member></application>
+                  <action>allow</action>
+                  <log-start>yes</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>PCI payment terminals to internal payment processing API</description>
+                </entry>
+
+                <entry name="allow-scada-historian-to-app">
+                  <from><member>scada_network</member></from>
+                  <to><member>app_servers</member></to>
+                  <source><member>10.100.0.50</member></source>
+                  <destination><member>10.20.0.60</member></destination>
+                  <service><member>service-https</member></service>
+                  <application><member>ssl</member></application>
+                  <action>allow</action>
+                  <log-start>yes</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>SCADA historian pushing data to analytics app server</description>
+                </entry>
+
+                <entry name="allow-dr-heartbeat">
+                  <from><member>dr_site</member></from>
+                  <to><member>core</member></to>
+                  <source><member>10.110.0.1</member></source>
+                  <destination><member>10.60.0.1</member></destination>
+                  <service><member>service-https</member></service>
+                  <application><member>ssl</member></application>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>DR site heartbeat check back to primary core</description>
+                </entry>
+
+                <!-- Disabled rule example -->
+                <entry name="allow-legacy-proxy-trust-to-dmz">
+                  <from><member>trust</member></from>
+                  <to><member>dmz</member></to>
+                  <source><member>10.10.10.0/24</member></source>
+                  <destination><member>172.16.10.100</member></destination>
+                  <service><member>service-http-proxy</member></service>
+                  <application><member>web-browsing</member></application>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>yes</disabled>
+                  <description>DISABLED: Legacy HTTP proxy rule - replaced by direct internet access</description>
+                </entry>
+
+                <entry name="allow-backup-db-to-core">
+                  <from><member>database_servers</member></from>
+                  <to><member>core</member></to>
+                  <source><member>10.30.0.0/24</member></source>
+                  <destination><member>10.60.0.70</member></destination>
+                  <service><member>service-nfs</member></service>
+                  <application><member>ms-ds-smbv2</member></application>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>Allow database backup to core NFS storage server</description>
+                </entry>
+
+                <entry name="allow-zabbix-mgmt-to-all">
+                  <from><member>management</member></from>
+                  <to><member>trust</member><member>app_servers</member><member>database_servers</member><member>core</member><member>dmz</member></to>
+                  <source><member>192.168.100.50</member></source>
+                  <destination><member>any</member></destination>
+                  <service><member>service-zabbix</member></service>
+                  <application><member>zabbix</member></application>
+                  <action>allow</action>
+                  <log-start>no</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>Zabbix monitoring agent checks from management server</description>
+                </entry>
+
+                <!-- ============================================================ -->
+                <!-- SECTION 24: Inter-zone Deny Rules and Final Catch-All        -->
+                <!-- ============================================================ -->
+
+                <entry name="deny-guest-to-all-internal">
+                  <from><member>guest_wifi</member></from>
+                  <to><member>trust</member><member>app_servers</member><member>database_servers</member><member>core</member><member>management</member><member>payment_systems</member><member>scada_network</member></to>
+                  <source><member>any</member></source>
+                  <destination><member>any</member></destination>
+                  <service><member>any</member></service>
+                  <application><member>any</member></application>
+                  <action>deny</action>
+                  <log-start>yes</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>Block guest WiFi from reaching any internal zone</description>
+                </entry>
+
+                <entry name="deny-iot-to-sensitive">
+                  <from><member>iot_devices</member></from>
+                  <to><member>database_servers</member><member>management</member><member>payment_systems</member><member>scada_network</member></to>
+                  <source><member>any</member></source>
+                  <destination><member>any</member></destination>
+                  <service><member>any</member></service>
+                  <application><member>any</member></application>
+                  <action>deny</action>
+                  <log-start>yes</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>Block IoT devices from reaching sensitive zones</description>
+                </entry>
+
+                <entry name="deny-untrust-to-management">
+                  <from><member>untrust</member><member>internet_edge</member></from>
+                  <to><member>management</member></to>
+                  <source><member>any</member></source>
+                  <destination><member>any</member></destination>
+                  <service><member>any</member></service>
+                  <application><member>any</member></application>
+                  <action>deny</action>
+                  <log-start>yes</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>Block all internet to management zone</description>
+                </entry>
+
+                <entry name="deny-untrust-to-scada">
+                  <from><member>untrust</member><member>internet_edge</member></from>
+                  <to><member>scada_network</member></to>
+                  <source><member>any</member></source>
+                  <destination><member>any</member></destination>
+                  <service><member>any</member></service>
+                  <application><member>any</member></application>
+                  <action>deny</action>
+                  <log-start>yes</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>Block all internet to SCADA/ICS network</description>
+                </entry>
+
+                <entry name="deny-untrust-to-payment">
+                  <from><member>untrust</member><member>internet_edge</member></from>
+                  <to><member>payment_systems</member></to>
+                  <source><member>any</member></source>
+                  <destination><member>any</member></destination>
+                  <service><member>any</member></service>
+                  <application><member>any</member></application>
+                  <action>deny</action>
+                  <log-start>yes</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>Block all internet to PCI payment systems</description>
+                </entry>
+
+                <!-- Final catch-all deny -->
+                <entry name="deny-all-catch-all">
+                  <from><member>any</member></from>
+                  <to><member>any</member></to>
+                  <source><member>any</member></source>
+                  <destination><member>any</member></destination>
+                  <service><member>any</member></service>
+                  <application><member>any</member></application>
+                  <action>deny</action>
+                  <log-start>yes</log-start>
+                  <log-end>yes</log-end>
+                  <disabled>no</disabled>
+                  <description>Default deny - catch all unmatched traffic</description>
+                </entry>
+
+              </rules>
+            </security>
+          </rulebase>
+
+          <service>
+            <entry name="service-http">
+              <protocol><tcp><port>80</port></tcp></protocol>
+            </entry>
+            <entry name="service-https">
+              <protocol><tcp><port>443</port></tcp></protocol>
+            </entry>
+            <entry name="service-ssh">
+              <protocol><tcp><port>22</port></tcp></protocol>
+            </entry>
+            <entry name="service-rdp">
+              <protocol><tcp><port>3389</port></tcp></protocol>
+            </entry>
+            <entry name="service-smb">
+              <protocol><tcp><port>445</port></tcp></protocol>
+            </entry>
+            <entry name="service-ftp">
+              <protocol><tcp><port>21</port></tcp></protocol>
+            </entry>
+            <entry name="service-telnet">
+              <protocol><tcp><port>23</port></tcp></protocol>
+            </entry>
+            <entry name="service-mysql">
+              <protocol><tcp><port>3306</port></tcp></protocol>
+            </entry>
+            <entry name="service-postgresql">
+              <protocol><tcp><port>5432</port></tcp></protocol>
+            </entry>
+            <entry name="service-mssql">
+              <protocol><tcp><port>1433</port></tcp></protocol>
+            </entry>
+            <entry name="service-smtp">
+              <protocol><tcp><port>25</port></tcp></protocol>
+            </entry>
+            <entry name="service-dns-udp">
+              <protocol><udp><port>53</port></udp></protocol>
+            </entry>
+            <entry name="service-ipsec">
+              <protocol><udp><port>500,4500</port></udp></protocol>
+            </entry>
+            <entry name="service-snmp">
+              <protocol><udp><port>161</port></udp></protocol>
+            </entry>
+            <entry name="service-ntp">
+              <protocol><udp><port>123</port></udp></protocol>
+            </entry>
+            <entry name="service-ldap">
+              <protocol><tcp><port>389</port></tcp></protocol>
+            </entry>
+            <entry name="service-ldaps">
+              <protocol><tcp><port>636</port></tcp></protocol>
+            </entry>
+            <entry name="service-syslog">
+              <protocol><udp><port>514</port></udp></protocol>
+            </entry>
+            <entry name="service-radius">
+              <protocol><udp><port>1812,1813</port></udp></protocol>
+            </entry>
+            <entry name="service-mqtt">
+              <protocol><tcp><port>1883</port></tcp></protocol>
+            </entry>
+            <entry name="service-modbus">
+              <protocol><tcp><port>502</port></tcp></protocol>
+            </entry>
+            <entry name="service-dr-replication">
+              <protocol><tcp><port>8443</port></tcp></protocol>
+            </entry>
+            <entry name="service-http-alt">
+              <protocol><tcp><port>8080</port></tcp></protocol>
+            </entry>
+            <entry name="service-http-proxy">
+              <protocol><tcp><port>3128</port></tcp></protocol>
+            </entry>
+            <entry name="service-tftp">
+              <protocol><udp><port>69</port></udp></protocol>
+            </entry>
+            <entry name="service-oracle">
+              <protocol><tcp><port>1521</port></tcp></protocol>
+            </entry>
+            <entry name="service-rsh">
+              <protocol><tcp><port>514</port></tcp></protocol>
+            </entry>
+            <entry name="service-netbios">
+              <protocol><udp><port>137,138</port></udp></protocol>
+            </entry>
+            <entry name="service-imap">
+              <protocol><tcp><port>143</port></tcp></protocol>
+            </entry>
+            <entry name="service-icmp">
+              <protocol><tcp><port>0</port></tcp></protocol>
+              <description>ICMP placeholder - handled by application</description>
+            </entry>
+            <entry name="service-kerberos">
+              <protocol><tcp><port>88</port></tcp></protocol>
+            </entry>
+            <entry name="service-nfs">
+              <protocol><tcp><port>2049</port></tcp></protocol>
+            </entry>
+            <entry name="service-zabbix">
+              <protocol><tcp><port>10050,10051</port></tcp></protocol>
+            </entry>
+            <entry name="service-high-ports">
+              <protocol><tcp><port>1024-65535</port></tcp></protocol>
+            </entry>
+          </service>
+
+        </entry>
+      </vsys>
+    </entry>
+  </devices>
+</config>
