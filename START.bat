@@ -15,8 +15,8 @@ if not exist ".env" (
     echo    Created .env from .env.example
 )
 
-if "%PORT%"=="" set "PORT=8011"
-if "%VITE_PORT%"=="" set "VITE_PORT=5179"
+if "%PORT%"=="" set "PORT=8000"
+if "%VITE_PORT%"=="" set "VITE_PORT=5173"
 set "VITE_API_URL=http://127.0.0.1:%PORT%"
 
 :: Check for python/pip

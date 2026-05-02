@@ -3,7 +3,7 @@ import react from "@vitejs/plugin-react";
 import path from "path";
 
 function normalizeBackendTarget(value?: string) {
-  const raw = (value || "http://127.0.0.1:8011").trim().replace(/\/+$/, "");
+  const raw = (value || "http://127.0.0.1:8000").trim().replace(/\/+$/, "");
   return raw.endsWith("/api") ? raw.slice(0, -4) : raw;
 }
 

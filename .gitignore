@@ -9,6 +9,7 @@ venv/
 # Environment and local settings
 .env
 .env.*
+!.env.example
 .vscode/
 
 # Runtime artifacts

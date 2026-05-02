@@ -9,19 +9,31 @@ A production-grade firewall configuration analysis tool. Upload firewall configs
 ### Windows
 Double-click `START.bat`
 
-### Linux / Mac
+### Linux / Mac (Local, no Docker)
+Open two terminals:
+1) Backend (from repo root):
 ```bash
-./START.sh
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env
+python main.py
+```
+2) Frontend:
+```bash
+cd fortress-lens-main
+npm install
+npm run dev
 ```
 
-Then open **http://localhost:8080**
+Then open **http://localhost:5173**
 
 ---
 
 ## Architecture
 
 ```
-fortress-lens-main/   ← React + Vite frontend (port 8080)
+fortress-lens-main/   ← React + Vite frontend (port 5173)
   src/
     lib/api.ts         ← All API calls to the backend (SINGLE source of truth)
     pages/             ← Dashboard, LiveTraffic, Threats, Analysis, AttackPaths, Remediation
@@ -55,7 +67,7 @@ python main.py              # or: uvicorn main:app --reload --port 8000
 ```bash
 cd fortress-lens-main
 npm install
-npm run dev                 # Vite dev server on :8080, proxies /api → :8000
+npm run dev                 # Vite dev server on :5173, proxies /api → :8000
 ```
 
 ---
