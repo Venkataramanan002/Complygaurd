@@ -6,12 +6,13 @@ from dotenv import load_dotenv
 
 load_dotenv()
 BASE = f"http://localhost:{os.getenv('PORT', '8000')}"
+ADMIN_PASSWORD = os.environ["DEFAULT_ADMIN_PASSWORD"]  # from .env — never hardcode
 
 # Test 1: Admin login
 print("=== Test 1: Admin Login ===")
 r = requests.post(f"{BASE}/api/auth/login", json={
     "username": "admin",
-    "password": "Admin@Fortress2026!"
+    "password": ADMIN_PASSWORD
 })
 print(f"Status: {r.status_code}")
 print(f"Body: {r.text[:300]}")

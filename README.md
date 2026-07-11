@@ -15,7 +15,7 @@ Open two terminals:
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
+pip install -r requirements.txt        # or requirements.lock.txt for exact pinned versions
 cp .env.example .env    # then set JWT_SECRET and DEFAULT_ADMIN_PASSWORD
 python main.py
 ```
@@ -42,6 +42,8 @@ Bearer JWT. The frontend handles this automatically via its login page.
   (`{username, email, password, role}`, role: `viewer | analyst | auditor | admin`).
 - **Login:** `POST /api/auth/login` with `{username, password}` returns
   `{access_token, role}`. Send it as `Authorization: Bearer <token>`.
+- **Roles:** `viewer` and `auditor` are read-only (GET); `analyst` can also
+  upload configs and run analyses; `admin` can additionally manage users.
 - Login attempts are rate-limited to 5/minute per IP.
 
 ---

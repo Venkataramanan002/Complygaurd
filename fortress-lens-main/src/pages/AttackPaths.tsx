@@ -1,9 +1,12 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import * as d3Zoom from "d3-zoom";
+import * as d3Selection from "d3-selection";
 import { AppLayout } from "@/components/layout/AppLayout";
 import {
   ChevronDown, ChevronUp, Loader2, RefreshCw,
   AlertTriangle, Shield, X, Info, Zap, Lock, AlertCircle,
-  ShieldAlert, ShieldCheck, Search as SearchIcon, Target, Globe
+  ShieldAlert, ShieldCheck, Search as SearchIcon, Target, Globe,
+  Maximize2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SmartTooltip } from "@/components/ui/SmartTooltip";
@@ -198,25 +201,33 @@ function NodePanel({
 
 // ── FULL ATTACK GRAPH (forced layout) ────────────────────────────────────────
 
+const GRAPH_VIEW_HEIGHT = 560;
+
 function AttackGraphView({
   graph,
   onNodeClick,
+  onClear,
   selectedNode,
 }: {
   graph: AttackGraph;
   onNodeClick: (node: GraphNode) => void;
+  onClear: () => void;
   selectedNode: string | null;
 }) {
   const [hoveredEdge, setHoveredEdge] = useState<string | null>(null);
-  const [filterDeny, setFilterDeny]   = useState(false);
-  const svgRef = useRef<SVGSVGElement>(null);
+  const [showDeny, setShowDeny]       = useState(false);
+  const svgRef  = useRef<SVGSVGElement>(null);
+  const gRef    = useRef<SVGGElement>(null);
+  const zoomRef = useRef<d3Zoom.ZoomBehavior<SVGSVGElement, unknown> | null>(null);
 
   const { nodes, edges } = graph;
 
   // ── Layered layout ────────────────────────────────────────────────────────
-  const allowEdges = filterDeny ? edges.filter((e) => !e.is_deny) : edges;
+  // Layering always ignores deny edges — they are display-only noise
+  const layerEdges   = edges.filter((e) => !e.is_deny);
+  const visibleEdges = showDeny ? edges : layerEdges;
 
-  // Assign layers: entry=0, then BFS outward
+  // Assign layers: entry=0, then propagate forward along allow edges
   const layerOf: Record<string, number> = {};
   nodes.forEach((nd) => {
     layerOf[nd.id] = nd.is_entry_point ? 0 : nd.is_target ? 999 : -1;
@@ -226,9 +237,9 @@ function AttackGraphView({
   let pass = 0;
   while (changed && pass < 20) {
     changed = false; pass++;
-    allowEdges.forEach(({ source, target, is_deny }) => {
-      if (is_deny) return;
-      const newL = (layerOf[source] ?? 0) + 1;
+    layerEdges.forEach(({ source, target }) => {
+      if ((layerOf[source] ?? -1) < 0) return; // only propagate from assigned nodes
+      const newL = layerOf[source] + 1;
       if (newL > (layerOf[target] ?? -1) && layerOf[target] !== 999) {
         layerOf[target] = newL;
         changed = true;
@@ -236,7 +247,7 @@ function AttackGraphView({
     });
   }
   // Targets always go last
-  const maxLayer = Math.max(...Object.values(layerOf).filter((v) => v !== 999), 1);
+  const maxLayer = Math.max(...Object.values(layerOf).filter((v) => v !== 999 && v >= 0), 1);
   nodes.forEach((nd) => { if (nd.is_target) layerOf[nd.id] = maxLayer + 1; });
   nodes.forEach((nd) => { if (layerOf[nd.id] === -1) layerOf[nd.id] = Math.floor(maxLayer / 2); });
 
@@ -248,7 +259,31 @@ function AttackGraphView({
   });
 
   const layers = Object.keys(byLayer).map(Number).sort((a, b) => a - b);
-  const W = Math.max(900, layers.length * 180);
+
+  // Barycenter ordering: sort each layer by the average position of its
+  // neighbors in the adjacent layer, so edges cross as little as possible
+  const orderIndex: Record<string, number> = {};
+  layers.forEach((l) => byLayer[l].forEach((nd, i) => { orderIndex[nd.id] = i; }));
+  const neighborsOf = (id: string, dir: "in" | "out") =>
+    layerEdges
+      .filter((e) => (dir === "in" ? e.target === id : e.source === id))
+      .map((e) => (dir === "in" ? e.source : e.target));
+  for (let sweep = 0; sweep < 2; sweep++) {
+    const seq = sweep === 0 ? layers.slice(1) : layers.slice(0, -1).reverse();
+    const dir: "in" | "out" = sweep === 0 ? "in" : "out";
+    seq.forEach((l) => {
+      byLayer[l].sort((a, b) => {
+        const av = neighborsOf(a.id, dir).map((n) => orderIndex[n] ?? 0);
+        const bv = neighborsOf(b.id, dir).map((n) => orderIndex[n] ?? 0);
+        const am = av.length ? av.reduce((s, v) => s + v, 0) / av.length : orderIndex[a.id];
+        const bm = bv.length ? bv.reduce((s, v) => s + v, 0) / bv.length : orderIndex[b.id];
+        return am - bm;
+      });
+      byLayer[l].forEach((nd, i) => { orderIndex[nd.id] = i; });
+    });
+  }
+
+  const W = Math.max(900, layers.length * 200);
   const H = Math.max(400, Math.max(...layers.map((l) => (byLayer[l]?.length ?? 0))) * 90 + 80);
   const PAD_X = 90, PAD_Y = 60;
   const NR = 32; // node radius
@@ -268,6 +303,45 @@ function AttackGraphView({
     });
   });
 
+  // ── Zoom / pan ────────────────────────────────────────────────────────────
+  const fitView = useCallback(() => {
+    if (!svgRef.current || !zoomRef.current) return;
+    const cw = svgRef.current.clientWidth || 900;
+    const k = Math.min(cw / W, GRAPH_VIEW_HEIGHT / H, 1.25);
+    const tx = (cw - W * k) / 2;
+    const ty = (GRAPH_VIEW_HEIGHT - H * k) / 2;
+    d3Selection.select(svgRef.current)
+      .transition().duration(300)
+      .call(zoomRef.current.transform, d3Zoom.zoomIdentity.translate(tx, ty).scale(k));
+  }, [W, H]);
+
+  useEffect(() => {
+    if (!svgRef.current) return;
+    const zoom = d3Zoom.zoom<SVGSVGElement, unknown>()
+      .scaleExtent([0.25, 4])
+      .on("zoom", (event) => {
+        gRef.current?.setAttribute("transform", event.transform.toString());
+      });
+    zoomRef.current = zoom;
+    const sel = d3Selection.select(svgRef.current);
+    sel.call(zoom);
+    fitView();
+    return () => { sel.on(".zoom", null); };
+  }, [fitView]);
+
+  // ── Focus mode: selecting a zone dims everything not connected to it ─────
+  const connected = new Set<string>();
+  if (selectedNode) {
+    connected.add(selectedNode);
+    visibleEdges.forEach((e) => {
+      if (e.source === selectedNode) connected.add(e.target);
+      if (e.target === selectedNode) connected.add(e.source);
+    });
+  }
+  const nodeDimmed = (id: string) => !!selectedNode && !connected.has(id);
+  const edgeDimmed = (e: GraphEdge) =>
+    !!selectedNode && e.source !== selectedNode && e.target !== selectedNode;
+
   return (
     <div className="bg-card rounded-xl p-5 shadow-card mb-6">
       <div className="flex items-center justify-between mb-3">
@@ -276,28 +350,31 @@ function AttackGraphView({
           <p className="text-xs text-muted-foreground mt-0.5">
             {graph.stats.total_nodes} zones · {graph.stats.allow_edges} allow edges ·{" "}
             <span className="text-destructive">{graph.stats.high_risk_edges} high-risk</span>
-            {" · "}Click any zone to inspect its rules
+            {" · "}Scroll to zoom · drag to pan · click a zone to focus it
           </p>
         </div>
         <div className="flex items-center gap-2">
           <button
-            onClick={() => setFilterDeny(!filterDeny)}
+            onClick={() => setShowDeny(!showDeny)}
             className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-smooth border ${
-              filterDeny
+              showDeny
                 ? "bg-primary text-primary-foreground border-primary"
                 : "text-muted-foreground border-border hover:text-foreground"
             }`}
           >
-            {filterDeny ? "Allow rules only" : "Show all rules"}
+            {showDeny ? "Hide deny rules" : "Show deny rules"}
           </button>
+          <Button variant="outline" size="sm" className="h-8 text-xs" onClick={fitView}>
+            <Maximize2 className="h-3.5 w-3.5 mr-1" />Fit
+          </Button>
         </div>
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="rounded-lg overflow-hidden bg-background/40 border border-border/50">
         <svg
           ref={svgRef}
-          viewBox={`0 0 ${W} ${H}`}
-          style={{ width: "100%", height: Math.min(H, 480), display: "block" }}
+          style={{ width: "100%", height: GRAPH_VIEW_HEIGHT, display: "block", cursor: "grab" }}
+          onClick={onClear}
         >
           <defs>
             <marker id="ag-arr" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
@@ -315,8 +392,9 @@ function AttackGraphView({
             </filter>
           </defs>
 
+          <g ref={gRef}>
           {/* Edges */}
-          {allowEdges.map((edge, i) => {
+          {visibleEdges.map((edge, i) => {
             const from = positions[edge.source];
             const to   = positions[edge.target];
             if (!from || !to || edge.source === edge.target) return null;
@@ -324,6 +402,7 @@ function AttackGraphView({
             const isHigh  = num(edge.risk_score) >= 6;
             const isDeny  = edge.is_deny;
             const isHov   = hoveredEdge === edge.id;
+            const dimmed  = edgeDimmed(edge);
             const dx = to.x - from.x, dy = to.y - from.y;
             const len = Math.sqrt(dx * dx + dy * dy) || 1;
             const x1 = from.x + (dx / len) * NR;
@@ -334,6 +413,7 @@ function AttackGraphView({
             // Slight curve for parallel edges
             const mx = (x1 + x2) / 2 - dy * 0.15;
             const my = (y1 + y2) / 2 + dx * 0.15;
+            const d  = `M ${x1},${y1} Q ${mx},${my} ${x2},${y2}`;
 
             const stroke = isDeny ? "#374151" : isHigh ? "#ef4444" : "#4b5563";
             const marker = isDeny ? "url(#ag-arr-deny)" : isHigh ? "url(#ag-arr-red)" : "url(#ag-arr)";
@@ -341,27 +421,35 @@ function AttackGraphView({
             return (
               <g key={i}>
                 <path
-                  d={`M ${x1},${y1} Q ${mx},${my} ${x2},${y2}`}
+                  d={d}
                   fill="none"
                   stroke={stroke}
                   strokeWidth={isHov ? 3 : isHigh ? 2 : 1.5}
                   strokeDasharray={isDeny ? "3 3" : isHigh ? "none" : "4 3"}
                   markerEnd={marker}
-                  opacity={isHov ? 1 : isDeny ? 0.25 : 0.65}
+                  opacity={dimmed ? 0.08 : isHov ? 1 : isDeny ? 0.25 : 0.65}
+                  pointerEvents="none"
+                />
+                {/* Invisible wide catcher so the edge is actually hoverable */}
+                <path
+                  d={d}
+                  fill="none"
+                  stroke="transparent"
+                  strokeWidth={14}
                   style={{ cursor: "pointer" }}
                   onMouseEnter={() => setHoveredEdge(edge.id)}
                   onMouseLeave={() => setHoveredEdge(null)}
                 />
                 {isHov && (
-                  <g>
+                  <g pointerEvents="none">
                     <rect
-                      x={(x1 + x2) / 2 - 70} y={(y1 + y2) / 2 - 28}
-                      width={140} height={20} rx={4}
+                      x={(x1 + x2) / 2 - 80} y={(y1 + y2) / 2 - 30}
+                      width={160} height={22} rx={4}
                       fill="#111827" stroke="#374151" strokeWidth={1} opacity={0.95}
                     />
                     <text
-                      x={(x1 + x2) / 2} y={(y1 + y2) / 2 - 14}
-                      textAnchor="middle" fontSize={8.5} fill="#f3f4f6"
+                      x={(x1 + x2) / 2} y={(y1 + y2) / 2 - 15}
+                      textAnchor="middle" fontSize={9.5} fill="#f3f4f6"
                     >
                       {edge.rule_name.slice(0, 22)}{edge.rule_name.length > 22 ? "…" : ""} · :{edge.port} · risk {num(edge.risk_score).toFixed(1)}
                     </text>
@@ -379,6 +467,7 @@ function AttackGraphView({
             const isEntry    = nd.is_entry_point;
             const isTarget   = nd.is_target;
             const isSelected = selectedNode === nd.id;
+            const dimmed     = nodeDimmed(nd.id);
             const fillColor  = isTarget ? "#7f1d1d" : isEntry ? "#1e3a5f" : "#1f2937";
             const ringColor  = isTarget ? "#ef4444" : isEntry ? "#3b82f6" : "#374151";
             const label      = nd.label.length > 12 ? nd.label.slice(0, 12) + "…" : nd.label;
@@ -393,7 +482,8 @@ function AttackGraphView({
               <g
                 key={nd.id}
                 style={{ cursor: "pointer" }}
-                onClick={() => onNodeClick(nd)}
+                opacity={dimmed ? 0.15 : 1}
+                onClick={(e) => { e.stopPropagation(); onNodeClick(nd); }}
               >
                 {/* Glow for high-risk nodes */}
                 {inboundRisk >= 6 && (
@@ -410,16 +500,16 @@ function AttackGraphView({
                 {/* Main circle */}
                 <circle cx={x} cy={y} r={NR} fill={fillColor} stroke={ringColor} strokeWidth={2} />
                 {/* Zone icon */}
-                <text x={x} y={y - 5} textAnchor="middle" fontSize={10} fill={isTarget ? "#fca5a5" : isEntry ? "#93c5fd" : "#9ca3af"} fontWeight="700">
+                <text x={x} y={y - 6} textAnchor="middle" fontSize={10} fill={isTarget ? "#fca5a5" : isEntry ? "#93c5fd" : "#9ca3af"} fontWeight="700">
                   {isTarget ? "TGT" : isEntry ? "ENT" : "INT"}
                 </text>
                 {/* Label */}
-                <text x={x} y={y + 8} textAnchor="middle" fontSize={8} fill="#f9fafb" fontWeight="600">
+                <text x={x} y={y + 9} textAnchor="middle" fontSize={9} fill="#f9fafb" fontWeight="600">
                   {label}
                 </text>
                 {/* Role badge */}
-                {isEntry  && <text x={x} y={y + 20} textAnchor="middle" fontSize={6.5} fill="#93c5fd">ENTRY</text>}
-                {isTarget && <text x={x} y={y + 20} textAnchor="middle" fontSize={6.5} fill="#fca5a5">TARGET</text>}
+                {isEntry  && <text x={x} y={y + 21} textAnchor="middle" fontSize={7} fill="#93c5fd">ENTRY</text>}
+                {isTarget && <text x={x} y={y + 21} textAnchor="middle" fontSize={7} fill="#fca5a5">TARGET</text>}
                 {/* Risk dot */}
                 {inboundRisk >= 6 && (
                   <circle cx={x + NR - 4} cy={y - NR + 4} r={5} fill={riskHex(inboundRisk)} stroke="#111827" strokeWidth={1} />
@@ -427,6 +517,7 @@ function AttackGraphView({
               </g>
             );
           })}
+          </g>
         </svg>
       </div>
 
@@ -803,6 +894,7 @@ export default function AttackPaths() {
             <AttackGraphView
               graph={graph}
               onNodeClick={setSelected}
+              onClear={() => setSelected(null)}
               selectedNode={selectedNode?.id ?? null}
             />
           )}

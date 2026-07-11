@@ -2,7 +2,12 @@
 JWT auth guard middleware.
 
 Every /api/* route requires a valid Bearer token except the public allowlist.
-Enforced centrally here so no individual router can forget to opt in.
+Role enforcement (RBAC): viewer/auditor are read-only (GET only); analyst and
+admin may mutate. /api/auth/register is additionally admin-gated in its
+endpoint. Enforced centrally here so no individual router can forget to opt in.
+
+Role comes from the JWT claim, so a role change takes effect on next login
+(tokens live 8h). Acceptable for this deployment size.
 """
 
 from __future__ import annotations
@@ -44,9 +49,16 @@ class AuthGuardMiddleware(BaseHTTPMiddleware):
         if token:
             settings = get_settings()
             try:
-                jwt.decode(
+                payload = jwt.decode(
                     token, settings.jwt_secret, algorithms=[settings.jwt_algorithm]
                 )
+                # RBAC: mutations require analyst or admin; GET is open to all roles
+                role = payload.get("role", "viewer")
+                if request.method != "GET" and role not in ("admin", "analyst"):
+                    return JSONResponse(
+                        status_code=403,
+                        content={"detail": f"Role '{role}' is read-only"},
+                    )
                 return await call_next(request)
             except JWTError:
                 logger.warning("Rejected invalid JWT on %s %s", request.method, path)

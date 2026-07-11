@@ -57,6 +57,7 @@ const endpoint = (v: string | SimNode) => v as SimNode;
 
 export default function FirewallTopology() {
   const svgRef = useRef<SVGSVGElement>(null);
+  const fitRef = useRef<() => void>(() => {});
   const [zoneFilter, setZoneFilter] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
   const [search, setSearch] = useState("");
@@ -212,8 +213,16 @@ export default function FirewallTopology() {
       d3Drag.drag<SVGGElement, SimNode>()
         .on("start", (event, d) => { if (!event.active) simulation.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; })
         .on("drag", (event, d) => { d.fx = event.x; d.fy = event.y; })
-        .on("end", (event, d) => { if (!event.active) simulation.alphaTarget(0); d.fx = null; d.fy = null; })
+        // Dragged nodes stay where you drop them; double-click releases the pin
+        .on("end", (event) => { if (!event.active) simulation.alphaTarget(0); })
     );
+
+    nodeGroups.on("dblclick", (event, d) => {
+      event.stopPropagation();
+      d.fx = null;
+      d.fy = null;
+      simulation.alpha(0.3).restart();
+    });
 
     simulation.on("tick", () => {
       links
@@ -227,17 +236,33 @@ export default function FirewallTopology() {
       nodeGroups.attr("transform", d => `translate(${d.x ?? 0},${d.y ?? 0})`);
     });
 
+    // Fit the graph to the viewport based on actual node positions
+    const fitToView = () => {
+      const xs = simNodes.map(n => n.x ?? 0);
+      const ys = simNodes.map(n => n.y ?? 0);
+      const minX = Math.min(...xs) - 60, maxX = Math.max(...xs) + 60;
+      const minY = Math.min(...ys) - 60, maxY = Math.max(...ys) + 60;
+      const bw = Math.max(maxX - minX, 1), bh = Math.max(maxY - minY, 1);
+      const k = Math.min(width / bw, height / bh, 1.5);
+      const tx = (width - bw * k) / 2 - minX * k;
+      const ty = (height - bh * k) / 2 - minY * k;
+      svg.transition().duration(400).call(
+        zoomBehavior.transform,
+        d3Zoom.zoomIdentity.translate(tx, ty).scale(k)
+      );
+    };
+    fitRef.current = fitToView;
+
+    // Auto-fit once the layout settles
+    let didFit = false;
+    simulation.on("end", () => {
+      if (!didFit) { didFit = true; fitToView(); }
+    });
+
     return () => { simulation.stop(); };
   }, [filteredNodes, filteredEdges]);
 
-  const handleFit = () => {
-    if (!svgRef.current) return;
-    const svg = d3Selection.select(svgRef.current);
-    svg.transition().duration(500).call(
-      d3Zoom.zoom<SVGSVGElement, unknown>().transform,
-      d3Zoom.zoomIdentity
-    );
-  };
+  const handleFit = () => fitRef.current();
 
   return (
     <AppLayout title="Network Topology" breadcrumb={["Network Topology"]}>
@@ -304,6 +329,9 @@ export default function FirewallTopology() {
         <Button variant="outline" size="sm" className="h-8 text-xs" onClick={handleFit}>
           <Maximize2 className="h-3.5 w-3.5 mr-1" />Fit
         </Button>
+        <span className="text-xs text-muted-foreground">
+          Drag pins a node · double-click releases it
+        </span>
         {/* Legend */}
         <div className="flex items-center gap-3 ml-auto text-xs text-muted-foreground flex-wrap">
           <span className="flex items-center gap-1"><span className="w-3 h-3 border border-muted-foreground inline-block" /> FW</span>
