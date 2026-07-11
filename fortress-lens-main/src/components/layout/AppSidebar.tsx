@@ -1,5 +1,6 @@
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { clearToken, getAuthMe } from "@/lib/api";
 import {
   LayoutDashboard, Activity, ShieldAlert, BarChart3, Route, Wrench, Shield, User, LogOut, Network, Server, ClipboardCheck, ShieldCheck, Radar, GitPullRequest, Bell, Lock, FileText, Plug
 } from "lucide-react";
@@ -24,25 +25,19 @@ const navItems = [
   { title: "Devices", path: "/devices", icon: Server },
 ];
 
-interface UserProfile {
-  username: string;
-  email: string;
-  role: string;
-}
-
-async function fetchCurrentUser(): Promise<UserProfile> {
-  const res = await fetch("/api/auth/me");
-  if (!res.ok) return { username: "Analyst", email: "", role: "viewer" };
-  return res.json();
-}
-
 export function AppSidebar() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { data: user } = useQuery({
     queryKey: ["currentUser"],
-    queryFn: fetchCurrentUser,
+    queryFn: getAuthMe,
     staleTime: 5 * 60_000,
   });
+
+  const handleLogout = () => {
+    clearToken();
+    navigate("/login", { replace: true });
+  };
 
   const displayName = user?.username && user.username !== "anonymous"
     ? user.username
@@ -51,7 +46,7 @@ export function AppSidebar() {
   const displayRole = user?.role || "viewer";
 
   return (
-    <aside className="w-60 min-h-screen bg-card shadow-sidebar flex flex-col fixed left-0 top-0 z-40">
+    <aside className="w-60 h-screen bg-card shadow-sidebar flex flex-col fixed left-0 top-0 z-40">
       {/* Logo */}
       <div className="h-14 flex items-center gap-2.5 px-5 border-b border-border">
         <Shield className="h-5 w-5 text-primary" />
@@ -95,7 +90,9 @@ export function AppSidebar() {
               <p className="text-xs text-muted-foreground truncate capitalize">{displayRole}</p>
             )}
           </div>
-          <LogOut className="h-3.5 w-3.5 text-muted-foreground cursor-pointer hover:text-foreground transition-smooth" />
+          <button onClick={handleLogout} aria-label="Log out" title="Log out">
+            <LogOut className="h-3.5 w-3.5 text-muted-foreground cursor-pointer hover:text-foreground transition-smooth" />
+          </button>
         </div>
       </div>
     </aside>

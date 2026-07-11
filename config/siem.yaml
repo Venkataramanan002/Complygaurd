@@ -1,0 +1,31 @@
+# SIEM Integration Configuration
+# ────────────────────────────────────────
+#
+# Each target receives security events from Fortress Lens.
+# Supported types: webhook, syslog, splunk
+#
+# Auth tokens should be stored in environment variables
+# referenced by auth_env_var (never in this file).
+
+targets: []
+
+# Example targets (uncomment and configure as needed):
+#
+# targets:
+#   - name: slack-alerts
+#     type: webhook
+#     endpoint: https://hooks.slack.com/services/T00/B00/xxxx
+#     enabled: true
+#     auth_env_var: ""
+#
+#   - name: syslog-server
+#     type: syslog
+#     endpoint: "192.168.1.100:514"
+#     enabled: true
+#     auth_env_var: ""
+#
+#   - name: splunk-hec
+#     type: splunk
+#     endpoint: https://splunk.example.com:8088/services/collector
+#     enabled: true
+#     auth_env_var: SPLUNK_HEC_TOKEN

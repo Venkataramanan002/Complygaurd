@@ -30,7 +30,7 @@ export default function Hardening() {
               <XAxis dataKey="device_name" stroke="hsl(240,5%,40%)" fontSize={10} />
               <YAxis domain={[0, 100]} stroke="hsl(240,5%,40%)" fontSize={10} />
               <Tooltip contentStyle={{ backgroundColor: "hsl(240,10%,6%)", border: "1px solid hsl(240,5%,12%)", borderRadius: 8, fontSize: 11 }} />
-              <Bar dataKey="score" radius={[4, 4, 0, 0]} onClick={(d: any) => setSelectedDevice(d.device_name)}>
+              <Bar dataKey="score" radius={[4, 4, 0, 0]} onClick={(d) => setSelectedDevice((d as { device_name: string }).device_name)}>
                 {devices.map((d, i) => <Cell key={i} fill={scoreBarColor(d.score)} cursor="pointer" />)}
               </Bar>
             </BarChart>

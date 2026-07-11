@@ -1,0 +1,23 @@
+# Threat Intelligence Feed Configuration
+# ────────────────────────────────────────
+
+sources:
+  abuseipdb:
+    enabled: true
+    api_key_env: ABUSEIPDB_API_KEY
+    rate_limit_daily: 1000
+    weight: 0.4
+
+  otx:
+    enabled: true
+    api_key_env: OTX_API_KEY
+    rate_limit_daily: 0  # unlimited
+    weight: 0.3
+
+  virustotal:
+    enabled: true
+    api_key_env: VT_API_KEY
+    rate_limit_daily: 500
+    weight: 0.3
+
+cache_ttl_hours: 24

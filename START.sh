@@ -3,8 +3,6 @@ set -euo pipefail
 
 export PATH="/opt/venv/bin:${PATH}"
 
-mkdir -p /app/model
-
 echo "[start] Launching backend on :8000"
 uvicorn main:app --host 0.0.0.0 --port 8000 &
 BACKEND_PID=$!

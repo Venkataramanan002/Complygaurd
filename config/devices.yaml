@@ -1,0 +1,32 @@
+# Device Configuration — API Collectors
+# ──────────────────────────────────────
+# Each device entry defines how the collector connects and polls.
+# Credentials are read from environment variables (never stored in this file).
+
+devices:
+  - name: pa-fw-01
+    host: 192.168.1.1
+    vendor: paloalto
+    auth_type: apikey
+    credentials_env_var: PA_API_KEY
+    poll_interval_minutes: 15
+    enabled: true
+    verify_ssl: false
+
+  - name: fortigate-01
+    host: 192.168.1.2
+    vendor: fortinet
+    auth_type: token
+    credentials_env_var: FORTI_API_TOKEN
+    poll_interval_minutes: 15
+    enabled: true
+    verify_ssl: false
+
+  - name: asa-01
+    host: 192.168.1.3
+    vendor: cisco
+    auth_type: token
+    credentials_env_var: CISCO_FDM_TOKEN
+    poll_interval_minutes: 15
+    enabled: true
+    verify_ssl: false

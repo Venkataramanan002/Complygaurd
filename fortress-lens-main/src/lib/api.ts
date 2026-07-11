@@ -2,9 +2,8 @@
  * Firewall Analytics — API Service Layer
  *
  * How the base URL is resolved (in priority order):
- *  1. VITE_API_URL env var  — set in .env.local, e.g. VITE_API_URL=http://127.0.0.1:8011
- *  2. Same-origin /api      — works when Vite proxy is active (npm run dev)
- *  3. http://127.0.0.1:8011 — fallback for direct backend access
+ *  1. VITE_API_URL env var — set in .env.local, e.g. VITE_API_URL=http://127.0.0.1:8000
+ *  2. Same-origin /api     — Vite dev proxy in development, nginx proxy in production
  */
 
 function normalizeApiBase(raw: string) {
@@ -18,18 +17,28 @@ const BASE = (() => {
     ? ((import.meta as {env: Record<string,string>}).env.VITE_API_URL ?? "").trim()
     : "";
   if (envUrl) return normalizeApiBase(envUrl);
-
-  // If we are served from localhost (Vite dev server with proxy), use relative path
-  if (typeof window !== "undefined") {
-    const devHosts = new Set(["localhost", "127.0.0.1", "::1"]);
-    if (devHosts.has(window.location.hostname)) {
-      return "/api";
-    }
-  }
-
-  // Fallback: direct call to backend (needed when frontend is opened without dev server)
-  return "http://127.0.0.1:8011/api";
+  return "/api";
 })();
+
+// ─── Auth token ─────────────────────────────────────────────────────────────
+
+const TOKEN_KEY = "fortress_token";
+
+export const getToken = () => localStorage.getItem(TOKEN_KEY);
+export const setToken = (token: string) => localStorage.setItem(TOKEN_KEY, token);
+export const clearToken = () => localStorage.removeItem(TOKEN_KEY);
+
+function authHeaders(): Record<string, string> {
+  const token = getToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+function handleUnauthorized() {
+  clearToken();
+  if (window.location.pathname !== "/login") {
+    window.location.assign("/login");
+  }
+}
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const MAX_RETRIES = 2;
@@ -40,11 +49,14 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
     const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
     try {
       const res = await fetch(`${BASE}${path}`, {
-        headers: { "Content-Type": "application/json", ...options?.headers },
+        headers: { "Content-Type": "application/json", ...authHeaders(), ...options?.headers },
         signal: controller.signal,
         ...options,
       });
       if (!res.ok) {
+        if (res.status === 401 && path !== "/auth/login") {
+          handleUnauthorized();
+        }
         const text = await res.text().catch(() => res.statusText);
         const err = new Error(`API ${path} → ${res.status}: ${text}`);
         // Retry on 5xx server errors only
@@ -266,7 +278,7 @@ export async function uploadConfig(
       form.append("files", file);
     }
   }
-  const res = await fetch(`${BASE}/upload-config`, { method: "POST", body: form });
+  const res = await fetch(`${BASE}/upload-config`, { method: "POST", body: form, headers: authHeaders() });
   if (!res.ok) {
     const text = await res.text().catch(() => res.statusText);
     throw new Error(text);
@@ -275,7 +287,7 @@ export async function uploadConfig(
 }
 
 export async function parseConfig(uploadId: string): Promise<{ message: string }> {
-  const res = await fetch(`${BASE}/parse-config/${uploadId}`, { method: "POST" });
+  const res = await fetch(`${BASE}/parse-config/${uploadId}`, { method: "POST", headers: authHeaders() });
   if (!res.ok) throw new Error(await res.text());
   return res.json();
 }
@@ -283,7 +295,7 @@ export async function parseConfig(uploadId: string): Promise<{ message: string }
 export async function uploadData(file: File): Promise<unknown> {
   const form = new FormData();
   form.append("file", file);
-  const res = await fetch(`${BASE}/upload-data`, { method: "POST", body: form });
+  const res = await fetch(`${BASE}/upload-data`, { method: "POST", body: form, headers: authHeaders() });
   if (!res.ok) {
     const text = await res.text().catch(() => res.statusText);
     throw new Error(text);
@@ -294,7 +306,7 @@ export async function uploadData(file: File): Promise<unknown> {
 export async function validateUpload(file: File): Promise<ValidationResult> {
   const form = new FormData();
   form.append("file", file);
-  const res = await fetch(`${BASE}/validate-upload`, { method: "POST", body: form });
+  const res = await fetch(`${BASE}/validate-upload`, { method: "POST", body: form, headers: authHeaders() });
   if (!res.ok) throw new Error(await res.text());
   const raw = await res.json();
   // Normalise to the shape the UI expects
@@ -1150,7 +1162,7 @@ export interface DeviceAnalysisReport {
   failed: number;
   warnings: number;
   findings: DeviceFinding[];
-  summary: Record<string, any>;
+  summary: Record<string, string | number>;
 }
 
 export interface AllDeviceAnalysisResponse {

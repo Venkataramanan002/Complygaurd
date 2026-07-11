@@ -31,7 +31,6 @@ logging.basicConfig(
 )
 
 from backend_topology import app as topology_app
-from database.connection import init_db
 
 # Routers
 from api.ip_analysis import router as ip_analysis_router
@@ -51,6 +50,7 @@ from api.integrations_api import router as integrations_router
 from api.device_analysis_api import router as device_analysis_router
 
 # Security middleware
+from app.middleware.auth_guard import AuthGuardMiddleware
 from app.middleware.rate_limit import RateLimitMiddleware
 from app.middleware.request_logging import RequestLoggingMiddleware
 from app.middleware.upload_limit import UploadSizeLimitMiddleware
@@ -77,6 +77,7 @@ app.include_router(integrations_router)
 app.include_router(device_analysis_router)
 
 # ── Security middleware (order matters — outermost first) ─────────────────────
+app.add_middleware(AuthGuardMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(UploadSizeLimitMiddleware)
 app.add_middleware(RateLimitMiddleware)
@@ -106,11 +107,10 @@ app.add_middleware(
     allow_headers=["Authorization", "Content-Type", "Accept"],
 )
 
-# ── Startup ──────────────────────────────────────────────────────────────────
-@app.on_event("startup")
-async def startup_event():
-    await init_db()
+# init_db runs via the lifespan handler defined in backend_topology.py
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", "8000"))
-    uvicorn.run("main:app", host="0.0.0.0", port=port)
+    # Pass the app object (not "main:app") — the import string makes uvicorn
+    # re-import this module, registering every router and middleware twice.
+    uvicorn.run(app, host="0.0.0.0", port=port)

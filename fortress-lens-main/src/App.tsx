@@ -1,6 +1,8 @@
 import React from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Outlet, Route, Routes } from "react-router-dom";
+import { getToken } from "@/lib/api";
+import Login from "./pages/Login.tsx";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -64,6 +66,9 @@ class AppErrorBoundary extends React.Component<
   }
 }
 
+const RequireAuth = () =>
+  getToken() ? <Outlet /> : <Navigate to="/login" replace />;
+
 const App = () => (
   <AppErrorBoundary>
     <QueryClientProvider client={queryClient}>
@@ -72,6 +77,8 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route element={<RequireAuth />}>
             <Route path="/" element={<Index />} />
             <Route path="/live-traffic" element={<LiveTraffic />} />
             <Route path="/threats" element={<Threats />} />
@@ -90,6 +97,7 @@ const App = () => (
             <Route path="/reports" element={<Reports />} />
             <Route path="/integrations" element={<Integrations />} />
             <Route path="*" element={<NotFound />} />
+            </Route>
           </Routes>
         </BrowserRouter>
       </TooltipProvider>

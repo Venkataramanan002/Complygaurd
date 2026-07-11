@@ -1,4 +1,4 @@
-# Complygaurd
+# Fortress Lens
 
 A production-grade firewall configuration analysis tool. Upload firewall configs (Palo Alto, Cisco ASA, FortiGate) or traffic log data and get instant risk analysis, attack path simulation, threat detection, and remediation recommendations.
 
@@ -16,7 +16,7 @@ Open two terminals:
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env
+cp .env.example .env    # then set JWT_SECRET and DEFAULT_ADMIN_PASSWORD
 python main.py
 ```
 2) Frontend:
@@ -26,7 +26,23 @@ npm install
 npm run dev
 ```
 
-Then open **http://localhost:5173**
+Then open **http://localhost:5173** and sign in.
+
+---
+
+## Authentication
+
+Every `/api/*` endpoint except `/api/health` and `/api/auth/login` requires a
+Bearer JWT. The frontend handles this automatically via its login page.
+
+- **First run:** an `admin` account is created automatically with the password
+  from `DEFAULT_ADMIN_PASSWORD` in `.env`. Change it after first login.
+- **Creating users:** only admins can create accounts —
+  `POST /api/auth/register` with an admin token
+  (`{username, email, password, role}`, role: `viewer | analyst | auditor | admin`).
+- **Login:** `POST /api/auth/login` with `{username, password}` returns
+  `{access_token, role}`. Send it as `Authorization: Bearer <token>`.
+- Login attempts are rate-limited to 5/minute per IP.
 
 ---
 
@@ -144,9 +160,13 @@ proxy: {
 ## Environment Variables
 
 ```env
-# .env
+# .env — JWT_SECRET and DEFAULT_ADMIN_PASSWORD are REQUIRED
+JWT_SECRET=<long random string>                  # python -c "import secrets; print(secrets.token_hex(32))"
+DEFAULT_ADMIN_PASSWORD=<initial admin password>
 DATABASE_URL=sqlite+aiosqlite:///./firewall.db   # default SQLite
 # DATABASE_URL=postgresql+asyncpg://user:pass@localhost/firewall  # for Postgres
+# PORT=8000
+# CORS_ORIGINS=https://your-frontend.example.com  # comma-separated; empty = localhost dev defaults
 ```
 
 ---
@@ -169,14 +189,10 @@ npm run build               # outputs to dist/
 
 ---
 
-## Docker Deployment (GPU / Lightning.ai)
+## Docker Deployment
 
-This repo includes containerized deployment for NVIDIA GPU environments using:
-
-- CUDA runtime base image: `nvidia/cuda:12.1.0-runtime-ubuntu22.04`
-- Backend port: `8000`
-- Frontend port: `8501`
-- Model mount path in container: `/app/model`
+- Backend port: `8000` (python:3.11-slim)
+- Frontend port: `8501` (nginx:alpine, proxies `/api` to the backend)
 
 ### Prerequisites
 
@@ -185,15 +201,9 @@ docker --version
 docker compose version
 ```
 
-For GPU support, ensure Docker can access NVIDIA devices on the host.
-
-Create local runtime assets in the project root:
-
-```bash
-mkdir -p model
-# Place your model files inside ./model
-# Ensure firewall.db exists (or let the app create it)
-```
+Compose reads `JWT_SECRET` and `DEFAULT_ADMIN_PASSWORD` from `.env` in the
+project root — both are required. Ensure `firewall.db` exists before starting
+(`touch firewall.db`), since it is bind-mounted into the container.
 
 ### Option A: Split Services (Recommended for local testing)
 
@@ -246,8 +256,8 @@ curl http://localhost:8000/api/health
 ### Docker Files Included
 
 - `Dockerfile` (multi-stage with `backend-runtime`, `frontend-runtime`, `all-in-one-runtime` targets)
-- `docker-compose.yml` (GPU-enabled services + optional blackbox profile)
+- `docker-compose.yml` (backend + frontend services + optional blackbox profile)
 - `docker/nginx.frontend.conf` (frontend container proxy to backend service)
 - `docker/nginx.local.conf` (all-in-one proxy to localhost backend)
-- `start.sh` (runs backend and nginx in a single container)
+- `START.sh` (runs backend and nginx in a single container)
 - `.dockerignore` (build context cleanup)

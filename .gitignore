@@ -17,10 +17,17 @@ venv/
 *.tmp
 *.sqlite
 *.db
+.logs/
+data/
+
+# Local tool settings
+.claude/settings.local.json
 
 # Build outputs
 fortress-lens-main/node_modules/
 fortress-lens-main/dist/
+fortress-lens-main/test-results/
+fortress-lens-main/playwright-report/
 
 # Model and large local artifacts
 model/

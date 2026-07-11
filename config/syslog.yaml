@@ -1,0 +1,19 @@
+# Syslog Collection Server Configuration
+# ────────────────────────────────────────
+
+# Listening ports
+udp_port: 514
+tcp_port: 1514
+
+# Queue & batching
+buffer_size: 50000        # Max messages in async queue
+batch_size: 500           # Messages per batch drain
+flush_interval_seconds: 2 # Seconds between batch flushes
+
+# Source filtering — empty list means accept from all IPs
+allowed_sources: []
+# Example:
+# allowed_sources:
+#   - 192.168.1.0/24
+#   - 10.0.0.0/8
+#   - 172.16.0.0/12

@@ -90,8 +90,7 @@ class UserOut(BaseModel):
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
 
-# Allowed roles for *self-registration* — admin is excluded.
-_SELF_REGISTER_ROLES = frozenset({"viewer", "analyst", "auditor"})
+_VALID_ROLES = frozenset({"viewer", "analyst", "auditor", "admin"})
 
 
 def _hash_password(pw: str) -> str:
@@ -104,7 +103,7 @@ def _verify_password(pw: str, hashed: str) -> bool:
 
 def _create_access_token(data: dict) -> str:
     to_encode = data.copy()
-    to_encode["exp"] = datetime.datetime.utcnow() + datetime.timedelta(
+    to_encode["exp"] = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(
         minutes=_settings.jwt_expiry_minutes
     )
     return jwt.encode(to_encode, _settings.jwt_secret, algorithm=_settings.jwt_algorithm)
@@ -172,7 +171,15 @@ async def login(body: LoginRequest, db: AsyncSession = Depends(get_db)):
 
 
 @router.post("/register", response_model=UserOut, status_code=201)
-async def register(body: RegisterRequest, db: AsyncSession = Depends(get_db)):
+async def register(
+    body: RegisterRequest,
+    current_user: Optional[dict] = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    # SECURITY: only admins may create accounts — no open self-registration
+    if not current_user or current_user["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Admin role required")
+
     # Username uniqueness
     result = await db.execute(
         select(User).where(User.username == body.username.lower())
@@ -180,8 +187,7 @@ async def register(body: RegisterRequest, db: AsyncSession = Depends(get_db)):
     if result.scalar_one_or_none() is not None:
         raise HTTPException(status_code=409, detail="Username already exists")
 
-    # SECURITY: Self-registration can only assign viewer/analyst/auditor — never admin
-    role = body.role if body.role in _SELF_REGISTER_ROLES else "viewer"
+    role = body.role if body.role in _VALID_ROLES else "viewer"
 
     user = User(
         username=body.username.lower(),
@@ -202,8 +208,5 @@ async def register(body: RegisterRequest, db: AsyncSession = Depends(get_db)):
 @router.get("/me", response_model=UserOut)
 async def me(current_user: Optional[dict] = Depends(get_current_user)):
     if not current_user:
-        # Return anonymous stub so frontend doesn't break, but with clearly non-admin role
-        return UserOut(
-            username="anonymous", email="", role="viewer", created_at=""
-        )
+        raise HTTPException(status_code=401, detail="Not authenticated")
     return UserOut(**current_user)

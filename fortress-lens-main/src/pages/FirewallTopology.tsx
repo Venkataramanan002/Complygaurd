@@ -42,14 +42,9 @@ const SHAPE_LABELS: Record<string, string> = {
   endpoint: "EP",
 };
 
-interface SimNode extends TopoNode {
-  x?: number;
-  y?: number;
-  fx?: number | null;
-  fy?: number | null;
-}
+interface SimNode extends TopoNode, d3Force.SimulationNodeDatum {}
 
-interface SimEdge {
+interface SimEdge extends d3Force.SimulationLinkDatum<SimNode> {
   source: string | SimNode;
   target: string | SimNode;
   same_zone: boolean;
@@ -57,12 +52,15 @@ interface SimEdge {
   link_type?: string;
 }
 
+// After the force simulation initialises, edge endpoints are node objects
+const endpoint = (v: string | SimNode) => v as SimNode;
+
 export default function FirewallTopology() {
   const svgRef = useRef<SVGSVGElement>(null);
   const [zoneFilter, setZoneFilter] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
   const [search, setSearch] = useState("");
-  const [selectedNode, setSelectedNode] = useState<any | null>(null);
+  const [selectedNode, setSelectedNode] = useState<SimNode | null>(null);
 
   const topoQ = useQuery({
     queryKey: ["fullTopology"],
@@ -100,7 +98,7 @@ export default function FirewallTopology() {
     return true;
   });
   const nodeNames = new Set(filteredNodes.map(n => n.device_name));
-  const filteredEdges = rawEdges.filter((e: any) => nodeNames.has(e.source) && nodeNames.has(e.target));
+  const filteredEdges = rawEdges.filter(e => nodeNames.has(e.source) && nodeNames.has(e.target));
 
   // D3 simulation
   useEffect(() => {
@@ -122,10 +120,10 @@ export default function FirewallTopology() {
 
     // Clone data for simulation
     const simNodes: SimNode[] = filteredNodes.map(n => ({ ...n }));
-    const simEdges: SimEdge[] = filteredEdges.map((e: any) => ({ ...e }));
+    const simEdges: SimEdge[] = filteredEdges.map(e => ({ ...e }));
 
-    const simulation = d3Force.forceSimulation(simNodes as any)
-      .force("link", d3Force.forceLink(simEdges as any).id((d: any) => d.device_name).distance(120))
+    const simulation = d3Force.forceSimulation<SimNode>(simNodes)
+      .force("link", d3Force.forceLink<SimNode, SimEdge>(simEdges).id(d => d.device_name).distance(120))
       .force("charge", d3Force.forceManyBody().strength(-250))
       .force("center", d3Force.forceCenter(width / 2, height / 2))
       .force("collision", d3Force.forceCollide(35))
@@ -163,7 +161,7 @@ export default function FirewallTopology() {
       .data(simNodes)
       .enter().append("g")
       .attr("cursor", "pointer")
-      .on("click", (_event: any, d: SimNode) => setSelectedNode(d));
+      .on("click", (_event, d) => setSelectedNode(d));
 
     // Node shape with glow on hover
     nodeGroups.append("path")
@@ -173,7 +171,7 @@ export default function FirewallTopology() {
       .attr("stroke-width", (d: SimNode) => d.is_entry_point ? 2.5 : 1)
       .attr("opacity", 0.9)
       .on("mouseenter", function () { d3Selection.select(this).attr("opacity", 1).attr("stroke-width", 2.5); })
-      .on("mouseleave", function (_, d: any) { d3Selection.select(this).attr("opacity", 0.9).attr("stroke-width", d.is_entry_point ? 2.5 : 1); });
+      .on("mouseleave", function (_event, d) { d3Selection.select(this).attr("opacity", 0.9).attr("stroke-width", d.is_entry_point ? 2.5 : 1); });
 
     // Device type abbreviation inside shape
     nodeGroups.append("text")
@@ -212,21 +210,21 @@ export default function FirewallTopology() {
     // Drag
     nodeGroups.call(
       d3Drag.drag<SVGGElement, SimNode>()
-        .on("start", (event, d: any) => { if (!event.active) simulation.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; })
-        .on("drag", (_event, d: any) => { d.fx = _event.x; d.fy = _event.y; })
-        .on("end", (event, d: any) => { if (!event.active) simulation.alphaTarget(0); d.fx = null; d.fy = null; }) as any
+        .on("start", (event, d) => { if (!event.active) simulation.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; })
+        .on("drag", (event, d) => { d.fx = event.x; d.fy = event.y; })
+        .on("end", (event, d) => { if (!event.active) simulation.alphaTarget(0); d.fx = null; d.fy = null; })
     );
 
     simulation.on("tick", () => {
       links
-        .attr("x1", (d: any) => d.source.x)
-        .attr("y1", (d: any) => d.source.y)
-        .attr("x2", (d: any) => d.target.x)
-        .attr("y2", (d: any) => d.target.y);
+        .attr("x1", d => endpoint(d.source).x ?? 0)
+        .attr("y1", d => endpoint(d.source).y ?? 0)
+        .attr("x2", d => endpoint(d.target).x ?? 0)
+        .attr("y2", d => endpoint(d.target).y ?? 0);
       edgeLabels
-        .attr("x", (d: any) => ((d.source.x || 0) + (d.target.x || 0)) / 2)
-        .attr("y", (d: any) => ((d.source.y || 0) + (d.target.y || 0)) / 2 - 4);
-      nodeGroups.attr("transform", (d: any) => `translate(${d.x},${d.y})`);
+        .attr("x", d => ((endpoint(d.source).x || 0) + (endpoint(d.target).x || 0)) / 2)
+        .attr("y", d => ((endpoint(d.source).y || 0) + (endpoint(d.target).y || 0)) / 2 - 4);
+      nodeGroups.attr("transform", d => `translate(${d.x ?? 0},${d.y ?? 0})`);
     });
 
     return () => { simulation.stop(); };
@@ -236,7 +234,7 @@ export default function FirewallTopology() {
     if (!svgRef.current) return;
     const svg = d3Selection.select(svgRef.current);
     svg.transition().duration(500).call(
-      d3Zoom.zoom<SVGSVGElement, unknown>().transform as any,
+      d3Zoom.zoom<SVGSVGElement, unknown>().transform,
       d3Zoom.zoomIdentity
     );
   };
@@ -365,7 +363,7 @@ export default function FirewallTopology() {
                     <div className="border-t border-border pt-2 mt-2">
                       <span className="text-xs uppercase tracking-widest text-muted-foreground font-bold">VLANs ({selectedNode.vlans.length})</span>
                       <div className="mt-1 space-y-0.5 max-h-24 overflow-y-auto">
-                        {selectedNode.vlans.map((v: any) => (
+                        {selectedNode.vlans.map(v => (
                           <div key={v.id} className="flex justify-between"><span className="text-muted-foreground">VLAN {v.id}</span><span className="text-foreground">{v.name}</span></div>
                         ))}
                       </div>
@@ -375,7 +373,7 @@ export default function FirewallTopology() {
                     <div className="border-t border-border pt-2 mt-2">
                       <span className="text-xs uppercase tracking-widest text-muted-foreground font-bold">Trunk Ports ({selectedNode.trunk_ports.length})</span>
                       <div className="mt-1 space-y-0.5">
-                        {selectedNode.trunk_ports.map((p: any, i: number) => (
+                        {selectedNode.trunk_ports.map((p, i) => (
                           <div key={i} className="text-foreground font-mono">{p.port}{p.neighbor ? ` \u2192 ${p.neighbor}` : ""}</div>
                         ))}
                       </div>
@@ -385,7 +383,7 @@ export default function FirewallTopology() {
                     <div className="border-t border-border pt-2 mt-2">
                       <span className="text-xs uppercase tracking-widest text-muted-foreground font-bold">Port Security ({selectedNode.port_security.length})</span>
                       <div className="mt-1 space-y-0.5">
-                        {selectedNode.port_security.map((ps: any, i: number) => (
+                        {selectedNode.port_security.map((ps, i) => (
                           <div key={i} className="flex justify-between"><span className="text-muted-foreground font-mono">{ps.port}</span><span className="text-foreground">{ps.violation_mode} (max {ps.max_mac})</span></div>
                         ))}
                       </div>
@@ -409,7 +407,7 @@ export default function FirewallTopology() {
                     <div className="border-t border-border pt-2 mt-2">
                       <span className="text-xs uppercase tracking-widest text-muted-foreground font-bold">BGP Neighbors ({selectedNode.bgp_neighbors.length})</span>
                       <div className="mt-1 space-y-0.5">
-                        {selectedNode.bgp_neighbors.map((n: any, i: number) => (
+                        {selectedNode.bgp_neighbors.map((n, i) => (
                           <div key={i} className="flex justify-between"><span className="text-muted-foreground font-mono">{n.neighbor_ip}</span><span className="text-foreground">AS {n.remote_asn}</span></div>
                         ))}
                       </div>
@@ -419,7 +417,7 @@ export default function FirewallTopology() {
                     <div className="border-t border-border pt-2 mt-2">
                       <span className="text-xs uppercase tracking-widest text-muted-foreground font-bold">NAT Rules ({selectedNode.nat_rules.length})</span>
                       <div className="mt-1 space-y-0.5">
-                        {selectedNode.nat_rules.map((nr: any, i: number) => (
+                        {selectedNode.nat_rules.map((nr, i) => (
                           <div key={i} className="text-foreground text-xs">{nr.type}: {nr.inside_ip || nr.acl} \u2192 {nr.outside_ip || nr.interface || nr.pool}</div>
                         ))}
                       </div>
@@ -429,7 +427,7 @@ export default function FirewallTopology() {
                     <div className="border-t border-border pt-2 mt-2">
                       <span className="text-xs uppercase tracking-widest text-muted-foreground font-bold">Interfaces ({selectedNode.interfaces.length})</span>
                       <div className="mt-1 space-y-0.5 max-h-32 overflow-y-auto">
-                        {selectedNode.interfaces.map((intf: any, i: number) => (
+                        {selectedNode.interfaces.map((intf, i) => (
                           <div key={i} className="flex justify-between gap-2">
                             <span className="text-muted-foreground font-mono truncate">{intf.name}</span>
                             <span className="text-foreground font-mono">{intf.ip || "\u2014"}</span>

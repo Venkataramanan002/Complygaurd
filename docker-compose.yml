@@ -1,3 +1,5 @@
+# JWT_SECRET and DEFAULT_ADMIN_PASSWORD are read from the .env file in this
+# directory (docker compose substitutes them automatically). Both are required.
 services:
   backend:
     build:
@@ -7,20 +9,12 @@ services:
     container_name: firewall-backend
     environment:
       DATABASE_URL: sqlite+aiosqlite:///./firewall.db
-      MODEL_DIR: /app/model
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
+      DEFAULT_ADMIN_PASSWORD: ${DEFAULT_ADMIN_PASSWORD:?set DEFAULT_ADMIN_PASSWORD in .env}
     ports:
       - "8000:8000"
     volumes:
       - ./firewall.db:/app/firewall.db
-      - ./model:/app/model:ro
-    gpus: all
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
     restart: unless-stopped
 
   frontend:
@@ -33,8 +27,6 @@ services:
       - backend
     ports:
       - "8501:8501"
-    volumes:
-      - ./model:/app/model:ro
     restart: unless-stopped
 
   # Optional single-container black-box mode running both backend and frontend
@@ -47,19 +39,11 @@ services:
     container_name: firewall-blackbox
     environment:
       DATABASE_URL: sqlite+aiosqlite:///./firewall.db
-      MODEL_DIR: /app/model
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
+      DEFAULT_ADMIN_PASSWORD: ${DEFAULT_ADMIN_PASSWORD:?set DEFAULT_ADMIN_PASSWORD in .env}
     ports:
       - "8000:8000"
       - "8501:8501"
     volumes:
       - ./firewall.db:/app/firewall.db
-      - ./model:/app/model:ro
-    gpus: all
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
     restart: unless-stopped
